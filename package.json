@@ -9,6 +9,8 @@
     "start": "NODE_ENV=production node server.js"
   },
   "dependencies": {
+    "@material-ui/core": "^4.11.2",
+    "@material-ui/icons": "^4.11.2",
     "@shopify/koa-shopify-auth": "^3.1.70",
     "axios": "^0.21.0",
     "dotenv": "^8.2.0",
