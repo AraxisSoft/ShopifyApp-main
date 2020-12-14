@@ -1,0 +1,27 @@
+{{ 'socialmedia.css' | asset_url | stylesheet_tag }}
+<a href="#" class="float twitter" id="menu-share">
+</a>
+
+
+<ul class="ul">
+   {%- for test in shop.metafields.floatButton.test -%}
+  
+<li class="ulli"><a href={{test.link}} class={{test.logo}}>
+</a></li>
+{%- endfor -%}
+</ul>
+{% schema %}
+  {
+    "name": "Social Media",
+    "settings": []
+  }
+{% endschema %}
+
+{% stylesheet %}
+.whatsappSocial{
+  	background-image: url({{ 'whatsapp.svg' | asset_img_url: '300x' }})
+}
+{% endstylesheet %}
+
+{% javascript %}
+{% endjavascript %}
