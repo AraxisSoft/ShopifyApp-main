@@ -7,8 +7,18 @@ import {
   GridApi
 } from "@material-ui/core";
 import Button from '@material-ui/core';
-import { Query } from 'react-apollo';
+
 import gql from 'graphql-tag';
+import { Query } from 'react-apollo';
+import ApolloClient from 'apollo-boost';
+import GetAbandonedOrders from './GetAbandonedOrders';
+import { ApolloProvider } from 'react-apollo';
+
+const client = new ApolloClient({
+  fetchOptions: {
+    credentials: 'include'
+  },
+});
 
 import React, { useState } from 'react';
 import axios from 'axios';
@@ -143,17 +153,11 @@ const AbandonedCart = () => {
             <button onClick={savewhatsappnum}>savenum</button> 
             <button onClick={sendmsg1}>replace placeholder</button>
 
-            <Query query={GET_METAFIELD} >
-        {({ data, loading, error }) => {
-          if (loading) { return <div>Loading…</div>; }
-          if (error) { return <div>{error.message}</div>; }
-          console.log(data);
-          return (
-            <p>data</p>
+            <ApolloProvider client={client}>
+              <GetAbandonedOrders />
+            </ApolloProvider>
 
-          );
-        }}
-      </Query>
+            
             
         </div>
     );

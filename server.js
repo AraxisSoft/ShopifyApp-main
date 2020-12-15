@@ -10,6 +10,9 @@ const { log } = require('console');
 
 var bodyParser = require('koa-body')();
 dotenv.config();
+const { default: graphQLProxy } = require('@shopify/koa-shopify-graphql-proxy');
+const { ApiVersion } = require('@shopify/koa-shopify-graphql-proxy');
+
 
 const port = parseInt(process.env.PORT, 10) || 3000;
 const dev = process.env.NODE_ENV !== 'production';
@@ -38,7 +41,7 @@ const router = new Router();
       },
     })
   );
-  
+  server.use(graphQLProxy({version: ApiVersion.October19}))
 server.use(router.routes())
   server.use(verifyRequest());
   
