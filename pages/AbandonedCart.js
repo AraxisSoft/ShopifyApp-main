@@ -13,6 +13,9 @@ import { Query } from 'react-apollo';
 import ApolloClient from 'apollo-boost';
 import GetAbandonedOrders from './GetAbandonedOrders';
 import { ApolloProvider } from 'react-apollo';
+//import CreateDiscount from './CreateDiscount';
+import UpdatePrice from './UpdatePrice';
+import FixedDiscount from './FixedDiscount';
 
 const client = new ApolloClient({
   fetchOptions: {
@@ -147,7 +150,7 @@ const AbandonedCart = () => {
 
     return (
         <div>
-            <button onClick={getAbandonedCarts}>getAbandonedCartitems</button>
+            {/* <button onClick={getAbandonedCarts}>getAbandonedCartitems</button>
             <input placeholder="Whatsapp" value = {num1} onChange={e => setNum1(e.target.value)}></input>
             <input placeholder="Operator" value = {operator} onChange={e => setOperator1(e.target.value)}></input>
             <button onClick={savewhatsappnum}>savenum</button> 
@@ -155,9 +158,17 @@ const AbandonedCart = () => {
 
             <ApolloProvider client={client}>
               <GetAbandonedOrders />
-            </ApolloProvider>
+            </ApolloProvider> */}
+
+            {/* {CreateDiscount} */}
+            <ApolloProvider client={client}>
+                <UpdatePrice/>
+                <FixedDiscount title="basic tes" startsAt="2021-01-01" endsAt="2021-03-01" code="34231" amount="123456" />
+                </ApolloProvider> 
 
             
+            
+          
             
         </div>
     );

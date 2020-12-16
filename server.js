@@ -31,7 +31,7 @@ const router = new Router();
     createShopifyAuth({
       apiKey: SHOPIFY_API_KEY,
       secret: SHOPIFY_API_SECRET_KEY,
-      scopes: ['read_products','read_themes','write_themes','read_content','read_script_tags','write_script_tags','write_orders'],
+      scopes: ['write_products','read_products','read_themes','write_themes','read_content','read_script_tags','write_script_tags','write_orders','write_discounts','read_discounts'],
       afterAuth(ctx) {
         const { shop, accessToken } = ctx.session;
         ctx.cookies.set('shopOrigin', shop, { httpOnly: false,sameSite: 'None' });
@@ -41,7 +41,7 @@ const router = new Router();
       },
     })
   );
-  server.use(graphQLProxy({version: ApiVersion.October19}))
+  server.use(graphQLProxy({version: ApiVersion.October19}));
 server.use(router.routes())
   server.use(verifyRequest());
   

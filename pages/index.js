@@ -164,18 +164,18 @@ const handleSubmit=async(event)=> {
   }
   return (
     <div>
-      <h1>Hello World</h1>
+      {/* <h1>Hello World</h1>
       <button onClick={test}>Hello</button>
-      <button onClick={install}>Install</button>
+      <button onClick={install}>Install</button> */}
       <h1>Hello World</h1>
       <AbandonedCart/>
-      <form onSubmit={handleSubmit}>
+      {/* <form onSubmit={handleSubmit}>
         <label>
           Name:
           <input type="text" value={value} onChange={handleChange} />
         </label>
         <input type="submit" value="Submit" />
-      </form>
+      </form> */}
     </div>
   )
 }
