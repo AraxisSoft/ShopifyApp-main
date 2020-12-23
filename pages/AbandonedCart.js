@@ -123,12 +123,13 @@ const AbandonedCart = () => {
 
     const  getAbandonedCarts = async ()=>{
        
-        const params = JSON.stringify({
+        // const params = JSON.stringify({
 
-            "status": "closed",
+        //     "status": "closed",
             
-            });
-         const res = await api.get('/checkouts',{ params: { "status":"open","limit":"0" }});
+        //     });
+        //const res = await api.get('/checkouts',{ params: { "status":"open","limit":"0" }});
+         const res = await api.get('/checkouts');
          console.log(res);
          //res.data.checkouts[0].created_at
          //res.data.checkouts[0].customer.phone
@@ -150,8 +151,8 @@ const AbandonedCart = () => {
 
     return (
         <div>
-            {/* <button onClick={getAbandonedCarts}>getAbandonedCartitems</button>
-            <input placeholder="Whatsapp" value = {num1} onChange={e => setNum1(e.target.value)}></input>
+            <button onClick={getAbandonedCarts}>getAbandonedCartitems</button>
+            {/* <input placeholder="Whatsapp" value = {num1} onChange={e => setNum1(e.target.value)}></input>
             <input placeholder="Operator" value = {operator} onChange={e => setOperator1(e.target.value)}></input>
             <button onClick={savewhatsappnum}>savenum</button> 
             <button onClick={sendmsg1}>replace placeholder</button>
@@ -161,10 +162,10 @@ const AbandonedCart = () => {
             </ApolloProvider> */}
 
             {/* {CreateDiscount} */}
-            <ApolloProvider client={client}>
+            {/* <ApolloProvider client={client}>
                 <UpdatePrice/>
                 <FixedDiscount title="basic tes" startsAt="2021-01-01" endsAt="2021-03-01" code="34231" amount="123456" />
-                </ApolloProvider> 
+                </ApolloProvider>  */}
 
             
             

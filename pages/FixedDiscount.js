@@ -53,11 +53,11 @@ const FixedDiscount = ({ title, startsAt, endsAt, code, amount }) => {
         //     }
         // };
         const discountParam = {
-            title: "code bxgy test",
-            startsAt: "2016-01-01",
-            endsAt: "2019-04-18T02:38:45Z",
+            title: "new",
+            startsAt: "2021-01-01",
+            endsAt: "2029-04-18T02:38:45Z",
             usageLimit : 2,
-            code: "TESTCODE1001234",
+            code: "OPS12",
             customerSelection: {
               all: true
             },

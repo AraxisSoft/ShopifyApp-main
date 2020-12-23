@@ -6,7 +6,9 @@ const { default: createShopifyAuth } = require('@shopify/koa-shopify-auth');
 const { verifyRequest } = require('@shopify/koa-shopify-auth');
 const session = require('koa-session');
 const Router = require('koa-router');
+const {receiveWebhook, registerWebhook} = require('@shopify/koa-shopify-webhooks');
 const { log } = require('console');
+
 
 var bodyParser = require('koa-body')();
 dotenv.config();
@@ -19,7 +21,57 @@ const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
 
-const { SHOPIFY_API_SECRET_KEY, SHOPIFY_API_KEY } = process.env;
+const { SHOPIFY_API_SECRET_KEY, SHOPIFY_API_KEY, HOST} = process.env;
+const getSubscriptionUrl = async (accessToken, shop, returnUrl = process.env.HOST) => {
+  const query = JSON.stringify({
+    query: `mutation {
+      appSubscriptionCreate(
+        name: "Super Duper Plan"
+        returnUrl: "${returnUrl}"
+        test: true
+        lineItems: [
+          {
+            plan: {
+              appUsagePricingDetails: {
+                cappedAmount: { amount: 10, currencyCode: USD }
+                terms: "$1 for 1000 emails"
+              }
+            }
+          }
+          {
+            plan: {
+              appRecurringPricingDetails: {
+                price: { amount: 10, currencyCode: USD }
+              }
+            }
+          }
+        ]
+      )
+      {
+        userErrors {
+          field
+          message
+        }
+        confirmationUrl
+        appSubscription {
+          id
+        }
+      }
+    }`
+  });
+
+  const response = await fetch(`https://${shop}/admin/api/2020-10/graphql.json`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      "X-Shopify-Access-Token": accessToken,
+    },
+    body: query
+  })
+
+  const responseJson = await response.json();
+  return responseJson.data.appSubscriptionCreate.confirmationUrl;
+};
 app.prepare().then(() => {
   
 const router = new Router();
@@ -32,26 +84,51 @@ const router = new Router();
       apiKey: SHOPIFY_API_KEY,
       secret: SHOPIFY_API_SECRET_KEY,
       scopes: ['write_products','read_products','read_themes','write_themes','read_content','read_script_tags','write_script_tags','write_orders','write_discounts','read_discounts'],
-      afterAuth(ctx) {
+      async afterAuth(ctx) {
         const { shop, accessToken } = ctx.session;
-        ctx.cookies.set('shopOrigin', shop, { httpOnly: false,sameSite: 'None' });
-        ctx.cookies.set('accessToken', accessToken,{sameSite: 'None'});
+        ctx.cookies.set("shopOrigin", shop, {
+          httpOnly: false,
+          secure: true,
+          sameSite: 'none'
+        });
+        const registration = await registerWebhook({
+          address: `${HOST}/webhooks/products/create`,
+          topic: 'PRODUCTS_CREATE',
+          accessToken,
+          shop,
+          apiVersion: ApiVersion.July20
+        });
+
+        if (registration.success) {
+          console.log('Successfully registered webhook!');
+        } else {
+          console.log('Failed to register webhook', registration.result);
         
-        ctx.redirect('/');
-      },
+        }
+
+        const returnUrl = `${HOST}?shop=${shop}`;
+        const subscriptionUrl = await getSubscriptionUrl(accessToken, shop, returnUrl);
+        ctx.redirect(subscriptionUrl);
+
+
+      }
     })
   );
   server.use(graphQLProxy({version: ApiVersion.October19}));
-server.use(router.routes())
-  server.use(verifyRequest());
-  
-  server.use(async (ctx) => {
-    await handle(ctx.req, ctx.res);
-    ctx.respond = false;
-    ctx.res.statusCode = 200;
-    return;
-  });
-  
+
+router.get('(.*)', verifyRequest(), async (ctx) => {
+  await handle(ctx.req, ctx.res);
+  ctx.respond = false;
+  ctx.res.statusCode = 200;
+ });
+ server.use(router.allowedMethods());
+ server.use(router.routes())
+  const webhook = receiveWebhook({secret: SHOPIFY_API_SECRET_KEY});
+
+ router.post('/webhooks/products/create', webhook, (ctx) => {
+   console.log('received webhook: ', ctx.state.webhook);
+   console.log('received webhook: ', ctx.state.webhook.topic);
+ });
 
 router.get('/api/:object', async (ctx) => {
   try {
@@ -114,6 +191,11 @@ router.get('/api/themes/:id/theme.liquid', async (ctx) => {
     console.log(err)
   }
 })
+
+router.get('/themes', async (ctx) => {
+  console.log("on server");
+})
+
 
 router.post('/')
 
