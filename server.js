@@ -131,7 +131,9 @@ router.get('(.*)', verifyRequest(), async (ctx) => {
  });
 
 router.get('/api/:object', async (ctx) => {
+  console.log("Inside");
   try {
+
     console.log("https://" + ctx.cookies.get('shopOrigin') + "/admin/api/2020-10/" + ctx.params.object + ".json")
     const results = await fetch("https://" + ctx.cookies.get('shopOrigin') + "/admin/api/2020-10/" + ctx.params.object + ".json", {
       headers: {
