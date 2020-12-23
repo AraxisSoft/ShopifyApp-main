@@ -128,7 +128,8 @@ const AbandonedCart = () => {
             "status": "closed",
             
             });
-         const res = await api.get('/checkouts',{ params: { "status":"open","limit":"0" }});
+           // const res = await api.get('/checkouts',{ params: { "status":"open","limit":"0" }});
+         const res = await api.get('/checkouts');
          console.log(res);
          //res.data.checkouts[0].created_at
          //res.data.checkouts[0].customer.phone
@@ -150,7 +151,7 @@ const AbandonedCart = () => {
 
     return (
         <div>
-            {/* <button onClick={getAbandonedCarts}>getAbandonedCartitems</button>
+            <button onClick={getAbandonedCarts}>getAbandonedCartitems</button>
             <input placeholder="Whatsapp" value = {num1} onChange={e => setNum1(e.target.value)}></input>
             <input placeholder="Operator" value = {operator} onChange={e => setOperator1(e.target.value)}></input>
             <button onClick={savewhatsappnum}>savenum</button> 
@@ -158,7 +159,7 @@ const AbandonedCart = () => {
 
             <ApolloProvider client={client}>
               <GetAbandonedOrders />
-            </ApolloProvider> */}
+            </ApolloProvider>
 
             {/* {CreateDiscount} */}
             <ApolloProvider client={client}>
