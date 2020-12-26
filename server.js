@@ -84,13 +84,18 @@ const router = new Router();
       apiKey: SHOPIFY_API_KEY,
       secret: SHOPIFY_API_SECRET_KEY,
       scopes: ['write_products','read_products','read_themes','write_themes','read_content','read_script_tags','write_script_tags','write_orders','write_discounts','read_discounts'],
+      accessMode: 'offline',
       async afterAuth(ctx) {
         const { shop, accessToken } = ctx.session;
+        console.log(shop + accessToken);
         ctx.cookies.set("shopOrigin", shop, {
           httpOnly: false,
           secure: true,
           sameSite: 'none'
         });
+        ctx.cookies.set('accessToken', accessToken,{sameSite: 'None',httpOnly: false,
+        secure: true});
+        ctx.redirect('/');
         const registration = await registerWebhook({
           address: `${HOST}/webhooks/products/create`,
           topic: 'PRODUCTS_CREATE',
@@ -116,13 +121,17 @@ const router = new Router();
   );
   server.use(graphQLProxy({version: ApiVersion.October19}));
 
-router.get('(.*)', verifyRequest(), async (ctx) => {
-  await handle(ctx.req, ctx.res);
-  ctx.respond = false;
-  ctx.res.statusCode = 200;
- });
+
  server.use(router.allowedMethods());
  server.use(router.routes())
+ server.use(verifyRequest());
+  
+ server.use(async (ctx) => {
+   await handle(ctx.req, ctx.res);
+   ctx.respond = false;
+   ctx.res.statusCode = 200;
+   return;
+ });
   const webhook = receiveWebhook({secret: SHOPIFY_API_SECRET_KEY});
 
  router.post('/webhooks/products/create', webhook, (ctx) => {
@@ -130,8 +139,25 @@ router.get('(.*)', verifyRequest(), async (ctx) => {
    console.log('received webhook: ', ctx.state.webhook.topic);
  });
 
+ router.get('/test', async (ctx) => {
+  try {
+    console.log("hehe got hit");
+    ctx.body = {
+      status: 'success',
+      data: "Success"
+    };
+    return
+  } 
+
+  catch (err) {
+    console.log(err)
+  }
+});
+
 router.get('/api/:object', async (ctx) => {
   console.log("Inside");
+  console.log(ctx.cookies.get('shopOrigin'));
+  console.log('accessToken' + ctx.cookies.get('accessToken'));
   try {
 
     console.log("https://" + ctx.cookies.get('shopOrigin') + "/admin/api/2020-10/" + ctx.params.object + ".json")
@@ -199,7 +225,6 @@ router.get('/themes', async (ctx) => {
 })
 
 
-router.post('/')
 
 router.post('/api/themes/:id/assets',bodyParser, async (ctx) => {
   try {
@@ -310,6 +335,11 @@ router.put('/api/:object',bodyParser, async (ctx) => {
     console.log(err)
   }
 })
+router.get('(.*)', verifyRequest(), async (ctx) => {
+  await handle(ctx.req, ctx.res);
+  ctx.respond = false;
+  ctx.res.statusCode = 200;
+ });
 server.listen(port, () => {
     console.log(`> Ready on http://localhost:${port}`);
 });

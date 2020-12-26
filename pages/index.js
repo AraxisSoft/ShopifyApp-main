@@ -3,6 +3,7 @@ import React,{useState} from 'react'
 import styles from '../styles/Home.module.css'
 import axios from 'axios';
 import AbandonedCart from './AbandonedCart'
+import AbandonCart from './Components/AbandonCart'
 const api = axios.create({
   baseURL: '/api',
   headers: {
@@ -167,8 +168,8 @@ const handleSubmit=async(event)=> {
       {/* <h1>Hello World</h1>
       <button onClick={test}>Hello</button>
       <button onClick={install}>Install</button> */}
-      <h1>Hello World</h1>
-      <AbandonedCart/>
+      <h1>Hello World1</h1>
+      {/* <AbandonedCart/> */}
       {/* <form onSubmit={handleSubmit}>
         <label>
           Name:
@@ -176,6 +177,10 @@ const handleSubmit=async(event)=> {
         </label>
         <input type="submit" value="Submit" />
       </form> */}
+
+      {/* HERE NEW START */}
+      <AbandonCart/>
+
     </div>
   )
 }
