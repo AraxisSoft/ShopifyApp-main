@@ -7,6 +7,17 @@ import TableContainer from "@material-ui/core/TableContainer";
 import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
+import Cookies from 'js-cookie';
+import clsx from 'clsx';
+import { makeStyles, useTheme } from '@material-ui/core/styles';
+import Input from '@material-ui/core/Input';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
+import ListItemText from '@material-ui/core/ListItemText';
+import Select from '@material-ui/core/Select';
+import Checkbox from '@material-ui/core/Checkbox';
+import Chip from '@material-ui/core/Chip';
 
 import axios from 'axios';
 const api = axios.create({
@@ -16,9 +27,112 @@ const api = axios.create({
   },
 });
 
+const useStyles = makeStyles((theme) => ({
+    formControl: {
+      margin: theme.spacing(1),
+      minWidth: 120,
+      maxWidth: 300,
+    },
+    chips: {
+      display: 'flex',
+      flexWrap: 'wrap',
+    },
+    chip: {
+      margin: 2,
+    },
+    noLabel: {
+      marginTop: theme.spacing(3),
+    },
+  }));
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
+};
+
+
 const AbandonCart = () => {
 
     const [data1, setData1] = useState([]);
+    const [metaInfo, setMetaInfo] = useState({});
+    const [tags, setTags] = useState([]);
+
+    
+const saveMsgStatus=async(cart_id )=> {
+    console.log(cart_id);
+    const temp={
+          msg1:'https://www.facebook.com', // 0 OR 1 0-> not sent || 1 -> sent
+          msg2:'twitter',
+          tag:''
+        }
+      
+    const obj={
+      "metafield": {
+        namespace: "messages",
+        key: cart_id,
+        value: JSON.stringify(temp),
+        value_type: "json_string"
+      }
+    }
+    const res = await api.post('/metafields', obj);
+    console.log(res.data);
+}
+
+// const test=async ()=>{
+//     console.log("GET META");
+//     try{
+        
+//     const data = await api.get('/metafields');
+//     console.log("GET META");
+//     console.log("META DATA" + data);
+//     }
+//     catch(err){
+//       console.log(err);
+//     }
+//   }
+
+const handleChangeMultiple = (event) => {
+    const { options } = event.target;
+    const value = [];
+    for (let i = 0, l = options.length; i < l; i += 1) {
+      if (options[i].selected) {
+        value.push(options[i].value);
+      }
+    }
+    setPersonName(value);
+  };
+
+  const test = useCallback(async () => {
+
+    const obj = {
+  
+    };
+    console.log("test "+obj);
+    try{
+    const res = await api.get('/metafields');
+    for (var i = 2; i < res.data.data.metafields.length; i++) {
+            let k  = res.data.data.metafields[i].key;
+            let v = res.data.data.metafields[i].value;
+            obj.k = v;
+            console.log("OBJ "+obj);
+    } 
+    setMetaInfo(obj);
+    console.log("OBJ "+metaInfo);
+
+  
+  }
+   catch(err){
+     console.log(err);
+   }
+   
+    
+  }, []);
 
     const getAbandonedCarts = useCallback(async () => {
         const res = await api.get('/checkouts');
@@ -32,11 +146,24 @@ const AbandonCart = () => {
       }, []);
 
     useEffect(() => {
-        getAbandonedCarts()
-      }, [getAbandonedCarts])
+        getAbandonedCarts();
+        test();
+      }, [])
 
     const columns = [
-       "Checkout, User",
+       {
+        label: "Checkout, User",
+        options: {
+            customBodyRender: (value, tableMeta, updateValue) => {
+                let arr= value ;
+                arr= arr.split(' ');
+                let hyperlink = window.location.href;
+                hyperlink =hyperlink.split('/');
+                hyperlink = Cookies.get('shopOrigin')+"/admin/checkouts/"+arr[2];
+                return  <div> <a target="_blank" href={hyperlink}>Cart Details</a>  <span> {arr[0]+ " "+arr[1]}</span></div>;
+            }
+        }
+        },
        {
         label: "Date",
         options: {
@@ -47,15 +174,72 @@ const AbandonCart = () => {
             }}
         }
        ,"Amount","Status",
+       {
+        label: "TAGS",
+        options: {
+            customBodyRender: (value, tableMeta, updateValue) => {
+                return (
+                    <div>
+                     <FormControl className={classes.formControl}>
+                        <InputLabel id="demo-mutiple-chip-label">Chip</InputLabel>
+                        <Select
+                          labelId="demo-mutiple-chip-label"
+                          id="demo-mutiple-chip"
+                          multiple
+                          value={personName}
+                          onChange={handleChange}
+                          input={<Input id="select-multiple-chip" />}
+                          renderValue={(selected) => (
+                            <div className={classes.chips}>
+                              {selected.map((value) => (
+                                <Chip key={value} label={value} className={classes.chip} />
+                              ))}
+                            </div>
+                          )}
+                          MenuProps={MenuProps}
+                        >
+                          {names.map((name) => (
+                            <MenuItem key={name} value={name} style={getStyles(name, personName, theme)}>
+                              {name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                       </div>
+                  );
+            //    let id = tableMeta.rowData[3]
+            //    let val= metaInfo.id;
+            //    console.log("val"  + val);
+            //    if(val){
+                   
+            //     return val;
+            //    }
+            //         return "";
+
+        
+            }}
+        },
       {
         label: "Message 1",
         options: {
             filter: true,
         customBodyRender: (value, tableMeta, updateValue) => {
-         
+           
+            return (
+                
+            <button onClick={(e)=>{
+                
+                e.preventDefault();
+
+                saveMsgStatus( tableMeta.rowData[3]);}}>
+            
+            { tableMeta.rowData[3]}</button>
+            )
         }
       }
         }
+    
+
       ,
       {
         label: "Message 2",
@@ -152,14 +336,16 @@ const AbandonCart = () => {
        }
     return (
         <div>
-            <h1>Inside MUIDataTable</h1>
+            
         <MUIDataTable
-        title={"ACME Employee list"}
+        title={"Abandoned Cart Recovery"}
         data={data1.map(item => {
             return [
-                item.abandoned_checkout_url,
-                item.currency +" " + item.total_price,
+                item.customer.first_name+ " "+item.customer.last_name+" "+item.id,
                 item.created_at,
+                item.currency +" " + item.total_price,
+                item.id,
+                item.id
 
                 
             ]
