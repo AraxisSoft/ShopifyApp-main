@@ -61,7 +61,9 @@ const AbandonCart = () => {
 
     const [data1, setData1] = useState([]);
     const [metaInfo, setMetaInfo] = useState({});
-    const [tags, setTags] = useState([]);
+    const [tags, setTags] = useState(['Oliver Hansen','Van Henry']);
+     const classes = useStyles();
+  const theme = useTheme();
 
     
 const saveMsgStatus=async(cart_id )=> {
@@ -69,7 +71,7 @@ const saveMsgStatus=async(cart_id )=> {
     const temp={
           msg1:'https://www.facebook.com', // 0 OR 1 0-> not sent || 1 -> sent
           msg2:'twitter',
-          tag:''
+          tag:"['fgfd','hjhj']"
         }
       
     const obj={
@@ -97,33 +99,32 @@ const saveMsgStatus=async(cart_id )=> {
 //     }
 //   }
 
-const handleChangeMultiple = (event) => {
-    const { options } = event.target;
-    const value = [];
-    for (let i = 0, l = options.length; i < l; i += 1) {
-      if (options[i].selected) {
-        value.push(options[i].value);
-      }
-    }
-    setPersonName(value);
+
+// TBC  LEARN PrMTERS PASSING
+const handleChange = (event) => {
+    console.log(event.target.value);
+    setMetaInfo[]
+    setMetaInfo
+    JSON.parse(event.target.value
   };
+
 
   const test = useCallback(async () => {
 
-    const obj = {
-  
-    };
-    console.log("test "+obj);
+   
+   
     try{
+    const obj = {};
     const res = await api.get('/metafields');
     for (var i = 2; i < res.data.data.metafields.length; i++) {
             let k  = res.data.data.metafields[i].key;
             let v = res.data.data.metafields[i].value;
-            obj.k = v;
-            console.log("OBJ "+obj);
+
+            obj[k] = v;
+            console.log("k v "+ k + " " + v + obj);
     } 
     setMetaInfo(obj);
-    console.log("OBJ "+metaInfo);
+    console.log("final metainfo "+JSON.stringify(metaInfo));
 
   
   }
@@ -177,7 +178,21 @@ const handleChangeMultiple = (event) => {
        {
         label: "TAGS",
         options: {
+
             customBodyRender: (value, tableMeta, updateValue) => {
+                let localtags = metaInfo;
+                console.log("localtags"+ metaInfo);
+                let a=null;
+                try {
+                 a = JSON.parse(metaInfo);
+                } catch (e) {
+                    a=metaInfo;
+
+                }
+                // console.log("a "+ a);
+                // let tag = JSON.parse(a[tableMeta.rowData[3]]).tag;
+                // console.log("a "+a[tableMeta.rowData[3]] + "tag" + tag);
+
                 return (
                     <div>
                      <FormControl className={classes.formControl}>
@@ -186,7 +201,7 @@ const handleChangeMultiple = (event) => {
                           labelId="demo-mutiple-chip-label"
                           id="demo-mutiple-chip"
                           multiple
-                          value={personName}
+                          value={JSON.parse(metaInfo[tableMeta.rowData[3]]).tag}
                           onChange={handleChange}
                           input={<Input id="select-multiple-chip" />}
                           renderValue={(selected) => (
@@ -198,9 +213,9 @@ const handleChangeMultiple = (event) => {
                           )}
                           MenuProps={MenuProps}
                         >
-                          {names.map((name) => (
-                            <MenuItem key={name} value={name} style={getStyles(name, personName, theme)}>
-                              {name}
+                          {tags.map((tag) => (
+                            <MenuItem key={tag} value={tag} >
+                              {tag}
                             </MenuItem>
                           ))}
                         </Select>
