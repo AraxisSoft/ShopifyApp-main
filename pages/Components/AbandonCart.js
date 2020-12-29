@@ -81,6 +81,7 @@ const saveMsgStatus=async(cart_id )=> {
         value: JSON.stringify(temp),
         value_type: "json_string"
       }
+      
     }
     const res = await api.post('/metafields', obj);
     console.log(res.data);
@@ -101,11 +102,48 @@ const saveMsgStatus=async(cart_id )=> {
 
 
 // TBC  LEARN PrMTERS PASSING
-const handleChange = (event) => {
+const handleChange = (event, key) => {
     console.log(event.target.value);
-    setMetaInfo[]
-    setMetaInfo
-    JSON.parse(event.target.value
+    console.log("FUNC "+metaInfo);
+   // metaInfo[key].tag = event.target.value;
+    let tempState = metaInfo;
+    console.log(tempState);
+    //tempState = JSON.parse(tempState);
+    console.log(tempState);
+    let result = tempState[key];
+    console.log("W JSON.parse"+JSON.stringify(result));
+    console.log("W JSON.parse"+result); // 0 OR 1 0-> not sent || 1 -> sent
+    //result =  JSON.parse(result);
+    try{
+      result =  JSON.parse(result);
+    }catch(e){
+      console.log(e);
+    }
+    console.log(result.msg1);
+    console.log(result.msg2);
+    console.log(result.tag);
+
+
+    const temp={
+      msg1:'https://www.facebook.com', 
+      msg2:'twitter',
+      tag:event.target.value
+    }
+
+    // result.tag=event.target.value;  =>THROWS AN ERROR OF TAG ON STRING
+    console.log("JSON.parse"+result);
+    //result=  JSON.parse(result);
+
+
+
+    result.tag=JSON.stringify(event.target.value);     //=>THROWS AN ERROR OF TAG ON STRING
+    tempState[key]=result;
+    console.log("tempState"+JSON.stringify(tempState));
+    //tempState=JSON.parse(tempState);
+    
+     //setMetaInfo(JSON.PA(tempState));
+    // setMetaInfo
+    // JSON.parse(event.target.value
   };
 
 
@@ -190,8 +228,15 @@ const handleChange = (event) => {
 
                 }
                 // console.log("a "+ a);
-                // let tag = JSON.parse(a[tableMeta.rowData[3]]).tag;
-                // console.log("a "+a[tableMeta.rowData[3]] + "tag" + tag);
+                let tag1= [];
+                try{
+                  tag1 = JSON.parse(a[tableMeta.rowData[3]]).tag;
+                }catch(e){
+                  tag1 = a[tableMeta.rowData[3]].tag;
+
+                }
+                
+                console.log("a "+a[tableMeta.rowData[3]] + "tag" + tag1);
 
                 return (
                     <div>
@@ -201,11 +246,14 @@ const handleChange = (event) => {
                           labelId="demo-mutiple-chip-label"
                           id="demo-mutiple-chip"
                           multiple
-                          value={JSON.parse(metaInfo[tableMeta.rowData[3]]).tag}
-                          onChange={handleChange}
+                          value={tag1 ? tag1 : tags}
+                          onChange={(e) => {
+                            handleChange(e, tableMeta.rowData[3])}}
                           input={<Input id="select-multiple-chip" />}
                           renderValue={(selected) => (
+                           
                             <div className={classes.chips}>
+                                {console.log("selected" + selected)}
                               {selected.map((value) => (
                                 <Chip key={value} label={value} className={classes.chip} />
                               ))}
@@ -362,7 +410,6 @@ const handleChange = (event) => {
                 item.id,
                 item.id
 
-                
             ]
         })}
         columns={columns}
