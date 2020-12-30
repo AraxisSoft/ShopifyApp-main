@@ -61,24 +61,20 @@ const AbandonCart = () => {
 
     const [data1, setData1] = useState([]);
     const [metaInfo, setMetaInfo] = useState({});
-    const [tags, setTags] = useState(['Oliver Hansen','Van Henry']);
+    const [tags, setTags] = useState(['Oliver Hansen','Van Henry',"2", "3", "4", "5"]);
      const classes = useStyles();
   const theme = useTheme();
 
     
-const saveMsgStatus=async(cart_id )=> {
-    console.log(cart_id);
-    const temp={
-          msg1:'https://www.facebook.com', // 0 OR 1 0-> not sent || 1 -> sent
-          msg2:'twitter',
-          tag:"['fgfd','hjhj']"
-        }
+const saveMsgStatus=async(cart_id, value )=> {
+    console.log(cart_id); 
+   
       
     const obj={
       "metafield": {
         namespace: "messages",
         key: cart_id,
-        value: JSON.stringify(temp),
+        value: JSON.stringify(value),
         value_type: "json_string"
       }
       
@@ -103,14 +99,26 @@ const saveMsgStatus=async(cart_id )=> {
 
 // TBC  LEARN PrMTERS PASSING
 const handleChange = (event, key) => {
-    console.log(event.target.value);
-    console.log("FUNC "+metaInfo);
+   
+    let arr= event.target.value + '';
+   
    // metaInfo[key].tag = event.target.value;
-    let tempState = metaInfo;
-    console.log(tempState);
-    //tempState = JSON.parse(tempState);
-    console.log(tempState);
+    let tempState = null;
+    try{
+      tempState =  JSON.parse(metaInfo);
+    }catch(e){
+      tempState = metaInfo;
+    }
+
+    let tempState1=null;
+    try{
+      tempState1 =  JSON.parse(tempState[key]);
+    }catch(e){
+      tempState1 = tempState[key];
+    }
+    console.log("tempState1" + tempState1);
     let result = tempState[key];
+    
     console.log("W JSON.parse"+JSON.stringify(result));
     console.log("W JSON.parse"+result); // 0 OR 1 0-> not sent || 1 -> sent
     //result =  JSON.parse(result);
@@ -119,51 +127,143 @@ const handleChange = (event, key) => {
     }catch(e){
       console.log(e);
     }
-    console.log(result.msg1);
-    console.log(result.msg2);
     console.log(result.tag);
-
-
-    const temp={
-      msg1:'https://www.facebook.com', 
-      msg2:'twitter',
-      tag:event.target.value
-    }
 
     // result.tag=event.target.value;  =>THROWS AN ERROR OF TAG ON STRING
     console.log("JSON.parse"+result);
     //result=  JSON.parse(result);
 
+    result.tag=arr;     //=>THROWS AN ERROR OF TAG ON STRING
 
-
-    result.tag=JSON.stringify(event.target.value);     //=>THROWS AN ERROR OF TAG ON STRING
     tempState[key]=result;
     console.log("tempState"+JSON.stringify(tempState));
-    //tempState=JSON.parse(tempState);
     
-     //setMetaInfo(JSON.PA(tempState));
-    // setMetaInfo
-    // JSON.parse(event.target.value
+    //tempState=JSON.parse(tempState);
+     setMetaInfo(JSON.stringify(tempState));
+     const temp={
+      msg1:result.msg1, // 0 OR 1 0-> not sent || 1 -> sent
+      msg2:result.msg2,
+      tag:result.tag
+    }
+    console.log(temp);
+    saveMsgStatus(key, temp)
+
+
+     
+
+    
   };
+
+  const updateMsg1 = (key) =>{
+    let tempState = null;
+    try{
+      tempState =  JSON.parse(metaInfo);
+    }catch(e){
+      tempState = metaInfo;
+    }
+
+    let tempState1=null;
+    try{
+      tempState1 =  JSON.parse(tempState[key]);
+    }catch(e){
+      tempState1 = tempState[key];
+    }
+    console.log("tempState1" + tempState1);
+    let result = tempState[key];
+
+    
+
+
+
+    try{
+      result =  JSON.parse(result);
+    }catch(e){
+      console.log(e);
+    }
+   
+    if("1" !== result.msg1){
+      result.msg1= "1";
+
+    tempState[key]=result;
+    console.log("tempState"+JSON.stringify(tempState));
+    
+    //tempState=JSON.parse(tempState);
+     setMetaInfo(JSON.stringify(tempState));
+     const temp={
+      msg1:"1", // 0 OR 1 0-> not sent || 1 -> sent
+      msg2:result.msg2,
+      tag:result.tag
+    }
+    
+    saveMsgStatus(key, temp);
+  }
+
+
+
+  }
+
+  const updateMsg2 = (key) =>{
+    let tempState = null;
+    try{
+      tempState =  JSON.parse(metaInfo);
+    }catch(e){
+      tempState = metaInfo;
+    }
+
+    let tempState1=null;
+    try{
+      tempState1 =  JSON.parse(tempState[key]);
+    }catch(e){
+      tempState1 = tempState[key];
+    }
+    console.log("tempState1" + tempState1);
+    let result = tempState[key];
+
+    
+
+
+
+    try{
+      result =  JSON.parse(result);
+    }catch(e){
+      console.log(e);
+    }
+   
+    if("1" !== result.msg2){
+      result.msg2= "1";
+
+    tempState[key]=result;
+    console.log("tempState"+JSON.stringify(tempState));
+    
+    //tempState=JSON.parse(tempState);
+     setMetaInfo(JSON.stringify(tempState));
+     const temp={
+      msg1:result.msg1, // 0 OR 1 0-> not sent || 1 -> sent
+      msg2:result.msg2,
+      tag:result.tag
+    }
+    
+    saveMsgStatus(key, temp);
+  }
+
+    
+  }
 
 
   const test = useCallback(async () => {
-
-   
    
     try{
     const obj = {};
     const res = await api.get('/metafields');
     for (var i = 2; i < res.data.data.metafields.length; i++) {
-            let k  = res.data.data.metafields[i].key;
-            let v = res.data.data.metafields[i].value;
-
+            const k  = res.data.data.metafields[i].key;
+            const v = res.data.data.metafields[i].value;
             obj[k] = v;
             console.log("k v "+ k + " " + v + obj);
     } 
-    setMetaInfo(obj);
-    console.log("final metainfo "+JSON.stringify(metaInfo));
+    setMetaInfo(JSON.stringify(obj));
 
+    console.log("final metainfo "+metaInfo[18611289424066]  );
   
   }
    catch(err){
@@ -218,25 +318,31 @@ const handleChange = (event, key) => {
         options: {
 
             customBodyRender: (value, tableMeta, updateValue) => {
-                let localtags = metaInfo;
+                const localtags = metaInfo;
                 console.log("localtags"+ metaInfo);
                 let a=null;
-                try {
-                 a = JSON.parse(metaInfo);
-                } catch (e) {
-                    a=metaInfo;
-
-                }
-                // console.log("a "+ a);
-                let tag1= [];
                 try{
-                  tag1 = JSON.parse(a[tableMeta.rowData[3]]).tag;
+                a =JSON.parse(localtags);
                 }catch(e){
-                  tag1 = a[tableMeta.rowData[3]].tag;
-
+                  a=localtags;
                 }
+                let b = null;
+                try{
+                  b = JSON.parse(a[tableMeta.rowData[3]]);
+                  }catch(e){
+                  b = a[tableMeta.rowData[3]];
+                }
+
+                // console.log("a "+ b.tag + "tag" );
+                // console.log(typeof b.tag);
+                let c = []
+                if(b.tag){
+                  c = b.tag.split(",");
+                  console.log("BBBBBBBB" + c + typeof c);
+                }
+                //let c = b.tag.split(",");
                 
-                console.log("a "+a[tableMeta.rowData[3]] + "tag" + tag1);
+                
 
                 return (
                     <div>
@@ -246,14 +352,14 @@ const handleChange = (event, key) => {
                           labelId="demo-mutiple-chip-label"
                           id="demo-mutiple-chip"
                           multiple
-                          value={tag1 ? tag1 : tags}
+                          value={ c}
                           onChange={(e) => {
                             handleChange(e, tableMeta.rowData[3])}}
                           input={<Input id="select-multiple-chip" />}
                           renderValue={(selected) => (
                            
                             <div className={classes.chips}>
-                                {console.log("selected" + selected)}
+                                {console.log(typeof selected)}
                               {selected.map((value) => (
                                 <Chip key={value} label={value} className={classes.chip} />
                               ))}
@@ -287,6 +393,28 @@ const handleChange = (event, key) => {
         options: {
             filter: true,
         customBodyRender: (value, tableMeta, updateValue) => {
+          const localtags = metaInfo;
+                console.log("localtags"+ metaInfo);
+                let a=null;
+                try{
+                a =JSON.parse(localtags);
+                }catch(e){
+                  a=localtags;
+                }
+                let b = null;
+                try{
+                  b = JSON.parse(a[tableMeta.rowData[3]]);
+                  }catch(e){
+                  b = a[tableMeta.rowData[3]];
+                }
+
+                // console.log("a "+ b.tag + "tag" );
+                // console.log(typeof b.tag);
+                let c = null
+                if(b.msg1){
+                  c = b.msg1;
+                  console.log("BBBBBBBB" + c + typeof c);
+                }
            
             return (
                 
@@ -294,9 +422,9 @@ const handleChange = (event, key) => {
                 
                 e.preventDefault();
 
-                saveMsgStatus( tableMeta.rowData[3]);}}>
-            
-            { tableMeta.rowData[3]}</button>
+                updateMsg1( tableMeta.rowData[3]);}}>
+           
+            { c === "1"? "Message Sent" : "Send Message"}</button>
             )
         }
       }
@@ -345,21 +473,21 @@ const handleChange = (event, key) => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        <TableRow key={data[rowMeta.rowIndex][0]}>
+                        <TableRow key={data1[rowMeta.rowIndex].id}>
                           <TableCell component="th" scope="row">
-                            {rows[rowMeta.rowIndex].name}
+                            {data1[rowMeta.rowIndex].referring_site}
                           </TableCell>
                           <TableCell align="right">
-                            {data[rowMeta.rowIndex][0]}
+                            {data1[rowMeta.rowIndex].referring_site}
                           </TableCell>
                           <TableCell align="right">
-                            {rows[rowMeta.rowIndex].fat}
+                            {data1[rowMeta.rowIndex].total_discounts}
                           </TableCell>
                           <TableCell align="right">
-                            {rows[rowMeta.rowIndex].carbs}
+                            {data1[rowMeta.rowIndex].total_discounts}
                           </TableCell>
                           <TableCell align="right">
-                            {rows[rowMeta.rowIndex].protein}
+                            {data1[rowMeta.rowIndex].total_discounts}
                           </TableCell>
                         </TableRow>
                       </TableBody>
