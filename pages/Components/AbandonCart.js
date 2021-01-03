@@ -14,10 +14,9 @@ import Input from '@material-ui/core/Input';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
-import ListItemText from '@material-ui/core/ListItemText';
 import Select from '@material-ui/core/Select';
-import Checkbox from '@material-ui/core/Checkbox';
 import Chip from '@material-ui/core/Chip';
+import MessageTemplate from './MessageTemplate'
 
 import axios from 'axios';
 const api = axios.create({
@@ -47,6 +46,8 @@ const useStyles = makeStyles((theme) => ({
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
+
+//for dropdown tags
 const MenuProps = {
   PaperProps: {
     style: {
@@ -56,14 +57,20 @@ const MenuProps = {
   },
 };
 
+const allConstants = {
+  msg_sent: '1',
+  msg_1:'msg1',
+  msg_2:'msg2'
+ 
+};
 
 const AbandonCart = () => {
 
     const [data1, setData1] = useState([]);
     const [metaInfo, setMetaInfo] = useState({});
     const [tags, setTags] = useState(['Oliver Hansen','Van Henry',"2", "3", "4", "5"]);
-     const classes = useStyles();
-  const theme = useTheme();
+
+    const classes = useStyles();
 
     
 const saveMsgStatus=async(cart_id, value )=> {
@@ -83,21 +90,8 @@ const saveMsgStatus=async(cart_id, value )=> {
     console.log(res.data);
 }
 
-// const test=async ()=>{
-//     console.log("GET META");
-//     try{
-        
-//     const data = await api.get('/metafields');
-//     console.log("GET META");
-//     console.log("META DATA" + data);
-//     }
-//     catch(err){
-//       console.log(err);
-//     }
-//   }
 
 
-// TBC  LEARN PrMTERS PASSING
 const handleChange = (event, key) => {
    
     let arr= event.target.value + '';
@@ -147,14 +141,9 @@ const handleChange = (event, key) => {
     }
     console.log(temp);
     saveMsgStatus(key, temp)
-
-
-     
-
-    
   };
 
-  const updateMsg1 = (key) =>{
+  const updateMsg = (key , msgNum) =>{
     let tempState = null;
     try{
       tempState =  JSON.parse(metaInfo);
@@ -171,16 +160,12 @@ const handleChange = (event, key) => {
     console.log("tempState1" + tempState1);
     let result = tempState[key];
 
-    
-
-
-
     try{
       result =  JSON.parse(result);
     }catch(e){
       console.log(e);
     }
-   
+   if(msgNum === allConstants.msg_1){
     if("1" !== result.msg1){
       result.msg1= "1";
 
@@ -190,45 +175,17 @@ const handleChange = (event, key) => {
     //tempState=JSON.parse(tempState);
      setMetaInfo(JSON.stringify(tempState));
      const temp={
-      msg1:"1", // 0 OR 1 0-> not sent || 1 -> sent
+      msg1:result.msg1, // 0 OR 1 0-> not sent || 1 -> sent
       msg2:result.msg2,
       tag:result.tag
     }
-    
     saveMsgStatus(key, temp);
   }
-
-
-
-  }
-
-  const updateMsg2 = (key) =>{
-    let tempState = null;
-    try{
-      tempState =  JSON.parse(metaInfo);
-    }catch(e){
-      tempState = metaInfo;
-    }
-
-    let tempState1=null;
-    try{
-      tempState1 =  JSON.parse(tempState[key]);
-    }catch(e){
-      tempState1 = tempState[key];
-    }
-    console.log("tempState1" + tempState1);
-    let result = tempState[key];
-
     
-
-
-
-    try{
-      result =  JSON.parse(result);
-    }catch(e){
-      console.log(e);
-    }
    
+  
+  }
+  else{
     if("1" !== result.msg2){
       result.msg2= "1";
 
@@ -242,12 +199,17 @@ const handleChange = (event, key) => {
       msg2:result.msg2,
       tag:result.tag
     }
-    
     saveMsgStatus(key, temp);
   }
-
+    
     
   }
+
+
+
+  }
+
+ 
 
 
   const test = useCallback(async () => {
@@ -255,16 +217,17 @@ const handleChange = (event, key) => {
     try{
     const obj = {};
     const res = await api.get('/metafields');
-    for (var i = 2; i < res.data.data.metafields.length; i++) {
+    console.log(res);
+    for (var i = 0; i < res.data.data.metafields.length; i++) {
+      if( res.data.data.metafields[i].namespace === "messages"){
             const k  = res.data.data.metafields[i].key;
             const v = res.data.data.metafields[i].value;
             obj[k] = v;
             console.log("k v "+ k + " " + v + obj);
+      }
     } 
     setMetaInfo(JSON.stringify(obj));
-
-    console.log("final metainfo "+metaInfo[18611289424066]  );
-  
+    //console.log("final metainfo "+metaInfo[18611289424066]  );
   }
    catch(err){
      console.log(err);
@@ -376,14 +339,7 @@ const handleChange = (event, key) => {
                       </FormControl>
                        </div>
                   );
-            //    let id = tableMeta.rowData[3]
-            //    let val= metaInfo.id;
-            //    console.log("val"  + val);
-            //    if(val){
-                   
-            //     return val;
-            //    }
-            //         return "";
+            
 
         
             }}
@@ -419,10 +375,10 @@ const handleChange = (event, key) => {
             return (
                 
             <button onClick={(e)=>{
-                
+             
                 e.preventDefault();
 
-                updateMsg1( tableMeta.rowData[3]);}}>
+                updateMsg( tableMeta.rowData[3], "msg1");}}>
            
             { c === "1"? "Message Sent" : "Send Message"}</button>
             )
@@ -436,9 +392,35 @@ const handleChange = (event, key) => {
         label: "Message 2",
         options: {
             customBodyRender: (value, tableMeta, updateValue) => {
+              const localtags = metaInfo;
+              console.log("localtags"+ metaInfo);
+              let a=null;
+              try{
+              a =JSON.parse(localtags);
+              }catch(e){
+                a=localtags;
+              }
+              let b = null;
+              try{
+                b = JSON.parse(a[tableMeta.rowData[3]]);
+                }catch(e){
+                b = a[tableMeta.rowData[3]];
+              }
+
+              // console.log("a "+ b.tag + "tag" );
+              // console.log(typeof b.tag);
+              let c = null
+              if(b.msg2){
+                c = b.msg2;
+                console.log("BBBBBBBB" + c + typeof c);
+              }
                 return (
-                    <button onClick={() => console.log(value, tableMeta.rowData[3]) }>
-                        Edit
+                    <button onClick={(e) => {
+                
+                      e.preventDefault();
+      
+                      updateMsg( tableMeta.rowData[3], "msg2");} }>
+                        { c === "1"? "Message Sent" : "Send Message"}
                     </button>
                 )}
             }
@@ -502,39 +484,16 @@ const handleChange = (event, key) => {
       };
 
      
-
-    const  sdfsdf = async ()=>{
-        // const params = JSON.stringify({
-
-        //     "status": "closed",
-            
-        //     });
-        //const res = await api.get('/checkouts',{ params: { "status":"open","limit":"0" }});
-         const res = await api.get('/checkouts');
-         console.log(res);
-         return res.data.checkouts;
-        //  res.data.checkouts[0].created_at
-        //  res.data.checkouts[0].customer.phone
-        //  res.data.checkouts[0].abandoned_checkout_url
-        //  res.data.checkouts[0].subtotal_price
-        //  storeurl+admin/checkouts/+temp1.data.checkouts[0].id
-
-        //  temp1.data.checkouts[0].line_items
-        //  temp1.data.checkouts[0].completed_at
-        //  temp1.data.checkouts[0].closed_at
-
-        
-       }
     return (
         <div>
-            
+            <MessageTemplate></MessageTemplate>
         <MUIDataTable
         title={"Abandoned Cart Recovery"}
         data={data1.map(item => {
             return [
                 item.customer.first_name+ " "+item.customer.last_name+" "+item.id,
                 item.created_at,
-                item.currency +" " + item.total_price,
+                item.currency + " " + item.total_price,
                 item.id,
                 item.id
 
@@ -543,6 +502,7 @@ const handleChange = (event, key) => {
         columns={columns}
         options={options}
       />
+
       </div>
     );
 };
