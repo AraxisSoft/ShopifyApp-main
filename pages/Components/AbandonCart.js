@@ -16,7 +16,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Chip from '@material-ui/core/Chip';
-import MessageTemplate from './MessageTemplate'
+import MessageTemplate from './MessageTemplate';
+import {gql,useLazyQuery,useQuery} from '@apollo/client';
+
 
 import axios from 'axios';
 const api = axios.create({
@@ -25,6 +27,47 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+const GET_DISCOUNTCODE = gql`
+{
+    priceRules (first:10) {
+      edges {
+        node {
+          id
+          discountCodes (first:10) {
+            edges {
+              node {
+                code
+                id
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+const GET_METAFIELD = gql`
+query OrdersData($namespace: String!) {
+    shop {
+       metafields(first:10, namespace: $namespace) {
+         edges {
+           node {
+             id
+             value
+             valueType
+             description
+             legacyResourceId
+           }
+         }
+       }
+     }
+   }
+`;
+
+
+
 
 const useStyles = makeStyles((theme) => ({
     formControl: {
@@ -69,12 +112,59 @@ const AbandonCart = () => {
     const [data1, setData1] = useState([]);
     const [metaInfo, setMetaInfo] = useState({});
     const [tags, setTags] = useState(['Oliver Hansen','Van Henry',"2", "3", "4", "5"]);
+    const [namespace, setNamespace]= useState('messages');
+
+    //const [addTodo, {  loading: mutationLoading, error: mutationError, data:mutationData }] = useMutation(ADD_TODO);
+    const  { called: discountCalled, loading: discountLoading, data: discountData, error: discountError } = useQuery(
+      GET_DISCOUNTCODE,
+  );
+
+    const [loadMetafields, { called: metaCalled, loading, data, error }] = useLazyQuery(
+      GET_METAFIELD,
+      { variables: { namespace: namespace } }
+    );
 
     const classes = useStyles();
 
+    if(discountError){
+      console.log("discountError");
+      console.log(JSON.stringify(discountError));
+    }
+    if(discountCalled){
+      console.log("MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM");
+      console.log(JSON.stringify(discountCalled));
+    }
+
+    //const getMetaFields = () => loadMetafields({ variables: { ... } })
+
+    const getMetaFields = () => {
+      loadMetafields();
+      if (loading) { 
+        console.log(loading) ;
+      
+    };if(error){
+      console.log(error) ;
+    }
+      // console.log("ERRORRRRRRRRRR "+error) ;
+      // console.log("WARNINGGGGGGGGGGGG "+data);
+      if(data){
+        
+      console.log("WARNINGGGGGGGGGGGG "+JSON.stringify(data));
+      }
+    
+    };
+
+    if(data){
+      console.log("INSIDE WARNINGGGGGGGGGGGG "+JSON.stringify(data));
+      const ab = data.shop.metafields.edges[0].node.value;
+      console.log(ab + JSON.stringify(ab));
+      console.log(data.shop.metafields.edges[0].node.value);
+      
+    }
+
     
 const saveMsgStatus=async(cart_id, value )=> {
-    console.log(cart_id); 
+    //console.log(cart_id); 
    
       
     const obj={
@@ -87,7 +177,7 @@ const saveMsgStatus=async(cart_id, value )=> {
       
     }
     const res = await api.post('/metafields', obj);
-    console.log(res.data);
+    //console.log(res.data);
 }
 
 
@@ -110,27 +200,27 @@ const handleChange = (event, key) => {
     }catch(e){
       tempState1 = tempState[key];
     }
-    console.log("tempState1" + tempState1);
+    //console.log("tempState1" + tempState1);
     let result = tempState[key];
     
-    console.log("W JSON.parse"+JSON.stringify(result));
-    console.log("W JSON.parse"+result); // 0 OR 1 0-> not sent || 1 -> sent
-    //result =  JSON.parse(result);
+    //console.log("W JSON.parse"+JSON.stringify(result));
+    //console.log("W JSON.parse"+result); // 0 OR 1 0-> not sent || 1 -> sent
+    
     try{
       result =  JSON.parse(result);
     }catch(e){
       console.log(e);
     }
-    console.log(result.tag);
+    //console.log(result.tag);
 
     // result.tag=event.target.value;  =>THROWS AN ERROR OF TAG ON STRING
-    console.log("JSON.parse"+result);
+    //console.log("JSON.parse"+result);
     //result=  JSON.parse(result);
 
     result.tag=arr;     //=>THROWS AN ERROR OF TAG ON STRING
 
     tempState[key]=result;
-    console.log("tempState"+JSON.stringify(tempState));
+    //console.log("tempState"+JSON.stringify(tempState));
     
     //tempState=JSON.parse(tempState);
      setMetaInfo(JSON.stringify(tempState));
@@ -139,11 +229,19 @@ const handleChange = (event, key) => {
       msg2:result.msg2,
       tag:result.tag
     }
-    console.log(temp);
+    //console.log(temp);
     saveMsgStatus(key, temp)
   };
 
   const updateMsg = (key , msgNum) =>{
+
+    if(msgNum === "1"){
+
+
+    }else{
+
+    }
+
     let tempState = null;
     try{
       tempState =  JSON.parse(metaInfo);
@@ -299,7 +397,7 @@ const handleChange = (event, key) => {
                 // console.log("a "+ b.tag + "tag" );
                 // console.log(typeof b.tag);
                 let c = []
-                if(b.tag){
+                if(b && b.tag){
                   c = b.tag.split(",");
                   console.log("BBBBBBBB" + c + typeof c);
                 }
@@ -367,7 +465,7 @@ const handleChange = (event, key) => {
                 // console.log("a "+ b.tag + "tag" );
                 // console.log(typeof b.tag);
                 let c = null
-                if(b.msg1){
+                if(b && b.msg1){
                   c = b.msg1;
                   console.log("BBBBBBBB" + c + typeof c);
                 }
@@ -410,7 +508,7 @@ const handleChange = (event, key) => {
               // console.log("a "+ b.tag + "tag" );
               // console.log(typeof b.tag);
               let c = null
-              if(b.msg2){
+              if(b && b.msg2){
                 c = b.msg2;
                 console.log("BBBBBBBB" + c + typeof c);
               }
@@ -486,6 +584,8 @@ const handleChange = (event, key) => {
      
     return (
         <div>
+          <button onClick={getMetaFields}>GQL</button>
+          
             <MessageTemplate></MessageTemplate>
         <MUIDataTable
         title={"Abandoned Cart Recovery"}

@@ -10,6 +10,53 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import Checkbox from '@material-ui/core/Checkbox';
 import MenuItem from '@material-ui/core/MenuItem';
+import {gql,useQuery ,useLazyQuery} from '@apollo/client';
+import ScrollMenu from "react-horizontal-scrolling-menu";
+import axios from 'axios';
+const api = axios.create({
+  baseURL: '/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+const GET_METAFIELD = gql`
+query OrdersData($namespace: String!) {
+    shop {
+       metafields(first:10, namespace: $namespace) {
+         edges {
+           node {
+             id
+             value
+             valueType
+             description
+             legacyResourceId
+           }
+         }
+       }
+     }
+   }
+`;
+
+const GET_DISCOUNTCODE = gql`
+{
+    priceRules (first:10) {
+      edges {
+        node {
+          id
+          discountCodes (first:10) {
+            edges {
+              node {
+                code
+                id
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
 
 const allConstants = {
     abandon1: '{{shop_name}}: Hi {{first_name}}, we noticed there were a few items left in your shopping cart 🛒{{cart_items}} If you’re ready to complete your order, your cart awaits you at 👉 {{checkout_url}}',
@@ -21,7 +68,7 @@ const allConstants = {
    
   };
 
-function MessageTemplate(props) {
+function MessageTemplate({parentComponent}) {
     const [open, setOpen] = useState(false); // for Dialogue box
     const [section, setSection] = useState(null); // Abandon | Review | Order Confirmation
 
@@ -30,10 +77,86 @@ function MessageTemplate(props) {
     const [textAfter, setTextAfter]= useState('');
     const [msgContent, setMsgContent]= useState(''); //
 
-    //For Abandon | Review | Order Confirmation
-    const [msg1,setMsg1]=useState('');
-    const [msg2,setMsg2]=useState('');
+    const [namespace, setNamespace]= useState('');
 
+    const [checked, setChecked]= useState(false);
+
+    const [state, setState]= useState('');
+
+    const [current,setCurrent]=useState(0);// 0 | 1 | 2
+
+    //For Abandon | Review | Order Confirmation
+    const [msg1,setMsg1]=useState(null);
+    const [msg2,setMsg2]=useState(null);
+
+    const [messages,setMessages]=useState(null);
+
+    const  {loading, data, error } = useQuery(
+        GET_METAFIELD,
+        { variables: { namespace: namespace } },{onCompleted: setMessages}
+    );
+
+    const [loadDiscountCodes, { called, loading: discountLoading, data: discountData, error: discountError }] = useLazyQuery(
+        GET_DISCOUNTCODE,
+    );
+
+
+    useEffect(() => {
+        setNamespace(parentComponent);
+    },[])
+    // useEffect(() => {
+    //     setNamespace(parentComponent);
+    //     //infinte recursion???
+    //     if()
+    //     loadMetafields();
+    //     if(data){
+    //         console.log("INSIDE WARNINGGGGGGGGGGGG "+JSON.stringify(data));
+    //         for (var i = 0; i < data.shop.metafields.edges.length; i++) {
+    //             const retValue = data.shop.metafields.edges[i].node.value;
+    //             if(retValue && i === 0){
+    //                 setMsg1(retValue);
+    //             }if(retValue && i === 1){
+    //                 setMsg2(retValue);
+    //             }
+    //         }
+    //         // console.log(ab + JSON.stringify(ab));
+    //         // console.log(data.shop.metafields.edges[0].node.value);
+    //       }
+
+       
+    //   }, [data])
+
+
+   
+       
+      
+     
+
+    
+
+
+
+    const saveMsgTemplate=async()=> {
+
+        const newKey= null;
+        if (current === 1){
+            newKey= "msg1";
+        }else{
+            newKey= "msg2";
+        }
+      
+        const obj={
+          "metafield": {
+            namespace: namespace, // Abandon | Review | Order
+            key: newKey,             // msg1 || msg2
+            value: JSON.stringify(msgContent),
+            value_type: "json_string"
+          }
+          
+        }
+        const res = await api.post('/metafields', obj);
+        //console.log(res.data);
+    }
     
 
     const insertMyText = e => {
@@ -66,11 +189,48 @@ function MessageTemplate(props) {
     
       const handleClose = () => {
         setOpen(false);
+        saveMsgTemplate();
       };
 
       const updateMsgTemplate = (msgNum) =>{
         console.log("OPEN");
         setOpen(true);
+        console.log(messages);
+        if(current === 1){
+            if(messages && messages.shop.metafields.edges.length>0){
+                setMsgContent( data.shop.metafields.edges[0].node.value);
+                
+            }else if(section === 'Abandon'){
+                setMsgContent(allConstants.abandon1);
+
+            }
+            else if(section === 'Review'){
+                setMsgContent(allConstants.review1);
+
+            }
+            else if(section === 'OrderConfirmation'){
+                setMsgContent(allConstants.confirmation1);
+
+            }
+
+        }
+        else if(current === 2 ){
+            if(messages && messages.shop.metafields.edges.length>1){
+                setMsgContent(data.shop.metafields.edges[1].node.value);
+                
+            }else if(section === 'Abandon'){
+                setMsgContent(allConstants.abandon2);
+
+            }
+            else if(section === 'Review'){
+                setMsgContent(allConstants.review2);
+
+            }
+            else if(section === 'OrderConfirmation'){
+                setMsgContent(allConstants.confirmation2);
+
+            }
+        }
 
       }
     
@@ -80,10 +240,20 @@ function MessageTemplate(props) {
                 <button onClick={(e)=>{
                     e.preventDefault();
                     console.log("OPEN");
-                    updateMsgTemplate( "msg1");}
+                    setCurrent(1);
+                    updateMsgTemplate( "msg1");
+                    
+                }
                     }>Edit Msg1</button>
 
-                <button>Edit Msg1</button>
+                <button onClick={(e)=>{
+                    e.preventDefault();
+                    console.log("OPEN");
+                    setCurrent(2);
+                    updateMsgTemplate( "msg2");
+                    
+                }
+                    }>Edit Msg1</button>
             </div>
              <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
              <DialogTitle id="form-dialog-title">Edit Message</DialogTitle>
@@ -124,6 +294,9 @@ function MessageTemplate(props) {
                     <div>
                         <Checkbox
                             value="checkedA"
+                            onChange={e => {
+                                this.setState({ isTrue: e.target.checked });
+                              }}
                             label="Create discount code (creates a unique code for each customer)"
                             inputProps={{ 'aria-label': 'Checkbox A' }}
                         />

@@ -4,10 +4,20 @@ import styles from '../styles/Home.module.css'
 import axios from 'axios';
 import AbandonedCart from './AbandonedCart'
 import AbandonCart from './Components/AbandonCart'
+import { ApolloProvider } from '@apollo/client';
+import ApolloClient from 'apollo-boost';
+import { InMemoryCache } from "apollo-cache-inmemory";
 const api = axios.create({
   baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
+  },
+});
+
+const client = new ApolloClient({
+ 
+  fetchOptions: {
+    credentials: 'include'
   },
 });
 export default function Home() {
@@ -179,7 +189,9 @@ const handleSubmit=async(event)=> {
       </form> */}
 
       {/* HERE NEW START */}
+      <ApolloProvider client={client}>
       <AbandonCart/>
+      </ApolloProvider>
 
     </div>
   )

@@ -9,6 +9,7 @@
     "start": "NODE_ENV=production node server.js"
   },
   "dependencies": {
+    "@apollo/client": "^3.3.6",
     "@material-ui/core": "^4.11.2",
     "@material-ui/icons": "^4.11.2",
     "@shopify/koa-shopify-auth": "^3.1.70",
@@ -30,6 +31,7 @@
     "react": "16.13.1",
     "react-apollo": "^3.1.5",
     "react-dom": "16.13.1",
+    "react-horizontal-scrolling-menu": "^0.7.8",
     "react-timeago": "^5.2.0"
   }
 }
