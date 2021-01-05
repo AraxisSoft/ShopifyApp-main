@@ -79,6 +79,8 @@ function MessageTemplate({parentComponent}) {
 
     const [namespace, setNamespace]= useState('');
 
+    
+
     const [checked, setChecked]= useState(false);
 
     const [state, setState]= useState('');
@@ -138,7 +140,7 @@ function MessageTemplate({parentComponent}) {
 
     const saveMsgTemplate=async()=> {
 
-        const newKey= null;
+        let newKey= null;
         if (current === 1){
             newKey= "msg1";
         }else{

@@ -83,7 +83,7 @@ const router = new Router();
     createShopifyAuth({
       apiKey: SHOPIFY_API_KEY,
       secret: SHOPIFY_API_SECRET_KEY,
-      scopes: ['write_products','read_products','read_themes','write_themes','read_content','read_script_tags','write_script_tags','write_orders','write_discounts','read_discounts'],
+      scopes: ['write_products','read_products','read_themes','write_themes','read_content','read_script_tags','write_script_tags','write_orders','write_discounts','read_discounts','read_price_rules'],
       accessMode: 'offline',
       async afterAuth(ctx) {
         const { shop, accessToken } = ctx.session;
