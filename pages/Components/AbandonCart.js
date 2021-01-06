@@ -54,11 +54,9 @@ query OrdersData($namespace: String!) {
        metafields(first:10, namespace: $namespace) {
          edges {
            node {
-             id
+             key
              value
-             valueType
-             description
-             legacyResourceId
+             
            }
          }
        }
@@ -119,6 +117,31 @@ const AbandonCart = () => {
   //const [addTodo, {  loading: mutationLoading, error: mutationError, data:mutationData }] = useMutation(ADD_TODO);
   const { called: discountCalled, loading: discountLoading, data: discountData, error: discountError } = useQuery(
     GET_DISCOUNTCODE,
+  );
+
+  const {  loading: metaLoading, data: metaData, error: metaError } = useQuery(
+    GET_METAFIELD,
+    { variables: { namespace: "messages" }, 
+      onCompleted: data => {
+        console.log(data);
+        console.log('onComplete');
+        const obj = {};
+      if(data && data.shop.metafields.edges){
+        for (var i = 0; i <  data.shop.metafields.edges.length; i++) {
+          if (data.shop.metafields.edges[i].node) {
+            const k = data.shop.metafields.edges[i].node.key;
+            const v = data.shop.metafields.edges[i].node.value;
+            obj[k] = v;
+            console.log("k v " + k + " " + v + obj);
+          }
+        }
+      }
+        setMetaInfo(JSON.stringify(obj));
+      },
+      onError: err => {
+       console.log('onError'+err);
+      },
+    }
   );
 
   const [loadMetafields, { called: metaCalled, loading, data, error }] = useLazyQuery(
@@ -186,15 +209,15 @@ const AbandonCart = () => {
 
   const saveDiscount = (discountCode, key) => {
     let allDiscounts = [];
-    for (var i = 0; i < discountData.priceRules.edges.length; i++) {
-      let currNode = discountData.priceRules.edges[i];
-      for (var j =0 ; j < currNode.node.discountCodes.edges.length;j++ ){
-        let discCode = currNode.node.discountCodes.edges[j].node.code;
-        allDiscounts.push(discCode);
-      }
-    }
-    setDiscounts(allDiscounts);
-    console.log(allDiscounts);
+    // for (var i = 0; i < discountData.priceRules.edges.length; i++) {
+    //   let currNode = discountData.priceRules.edges[i];
+    //   for (var j =0 ; j < currNode.node.discountCodes.edges.length;j++ ){
+    //     let discCode = currNode.node.discountCodes.edges[j].node.code;
+    //     allDiscounts.push(discCode);
+    //   }
+    // }
+    // setDiscounts(allDiscounts);
+    // console.log(allDiscounts);
 
   }
 
@@ -399,7 +422,7 @@ const AbandonCart = () => {
 
   useEffect(() => {
     getAbandonedCarts();
-    test();
+    //test();
     console.log("        useEffect       Called");
     console.log(discountData);
     let allDiscounts = [];
@@ -414,10 +437,14 @@ const AbandonCart = () => {
     }
     setDiscounts(allDiscounts);
     console.log(allDiscounts);
-  }, [discountData])
 
-  const discountItems = discounts.map((number) =>
-  <option value={number}>{number}</option>);
+
+
+
+  }, [metaData, discountData])
+
+  // const discountItems = state1.map((number) =>
+  // <option value={number}>{number}</option>);
 
   const columns = [
     {
@@ -426,6 +453,7 @@ const AbandonCart = () => {
         customBodyRender: (value, tableMeta, updateValue) => {
           let arr = value;
           arr = arr.split(' ');
+          console.log("INDEXXXXXXXXXXXXXXXXXXXX" +arr);
           let hyperlink = window.location.href;
           hyperlink = hyperlink.split('/');
           hyperlink = Cookies.get('shopOrigin') + "/admin/checkouts/" + arr[2];
@@ -692,6 +720,7 @@ const AbandonCart = () => {
       <button onClick={getMetaFields}>GQL</button>
 
       <MessageTemplate></MessageTemplate>
+      {data1.length > 0 &&
       <MUIDataTable
         title={"Abandoned Cart Recovery"}
         data={data1.map(item => {
@@ -707,6 +736,7 @@ const AbandonCart = () => {
         columns={columns}
         options={options}
       />
+  }
 
     </div>
   );
