@@ -114,6 +114,13 @@ const AbandonCart = () => {
 
   const [discounts, setDiscounts] = useState([]);
 
+  const abandonMetaField = {
+    msg1: 0, // 0 OR 1 0-> not sent || 1 -> sent
+    msg2: 0,
+    tag: "",
+    lastDiscountCode: ""
+  }
+
   //const [addTodo, {  loading: mutationLoading, error: mutationError, data:mutationData }] = useMutation(ADD_TODO);
   const { called: discountCalled, loading: discountLoading, data: discountData, error: discountError } = useQuery(
     GET_DISCOUNTCODE,
@@ -144,21 +151,28 @@ const AbandonCart = () => {
       onCompleted: returnedData => {
         console.log(returnedData);
         console.log('onComplete');
-        const obj = {};
+        const filteredResponse = {};
       if(returnedData){
         for (var i = 0; i <  returnedData?.shop?.metafields?.edges?.length; i++) {
           if (returnedData?.shop?.metafields?.edges[i]?.node) {
             const k = returnedData?.shop?.metafields?.edges[i]?.node?.key;
             const v = returnedData?.shop?.metafields?.edges[i]?.node?.value;
-            obj[k] = v;
-            console.log("k v " + k + " " + v + obj);
+            let parsedResponse = null;
+            try{
+              parsedResponse=JSON.parse(v);
+            }catch(e){
+              parsedResponse=v;
+              console.log(e);
+            }
+            filteredResponse[k] = parsedResponse;
+            console.log("k v " + k + " " + v + filteredResponse);
           }
         }
       }
-        setMetaInfo(JSON.stringify(obj));
+        setMetaInfo(filteredResponse);
       },
       onError: err => {
-       console.log('onError'+err);
+       console.log('onError '+ err);
       },
     }
   );
@@ -383,47 +397,37 @@ const AbandonCart = () => {
     }
 
 
-    const parseParams = (key, param, type, value) => {
+    const parseParams = (key, param) => {
 
-      let tempState = null;
-      try {
-        tempState = JSON.parse(metaInfo);
-      } catch (e) {
-        tempState = metaInfo;
+      let metaFieldValue = metaInfo[key];
+
+      let retValue= null;
+      if(metaFieldValue){
+        retValue = metaFieldValue[param];
       }
 
-      let tempState1 = null;
-      try {
-        tempState1 = JSON.parse(tempState[key]);
-      } catch (e) {
-        tempState1 = tempState[key];
-      }
-
-
-      if (tempState1) {
-      
-        let result = tempState[key];
-  
-        //console.log("W JSON.parse"+JSON.stringify(result));
-        //console.log("W JSON.parse"+result); // 0 OR 1 0-> not sent || 1 -> sent
-  
-        try {
-          result = JSON.parse(result);
-        } catch (e) {
-          console.log(result+ e);
-        }
-
-//check and correct it , valid syntax to check child of object etc
-        if (result && ( param in result)) {
-          result[param] = arr;     //=>THROWS AN ERROR OF TAG ON STRING
-        }
-      }
-
-
-
-
+      return retValue;
 
     }
+
+    const updateParams = (key, param, value) => {
+
+      let metaFieldValue = metaInfo[key];
+     
+      if(metaFieldValue){
+         metaFieldValue[param]= value;
+      }else{
+        //default metafield for newly created
+        metaFieldValue = abandonMetaField;
+        metaFieldValue[param]=value; //updated value
+      }
+
+      metaInfo[key]=metaFieldValue;
+      saveMsgStatus(key, metaFieldValue);
+     
+    }
+
+
     
 
   
@@ -509,16 +513,29 @@ const AbandonCart = () => {
       label: "Last Discount Applied",
       options: {
         customBodyRender: (value, tableMeta, updateValue) => {
+
+          let metaFieldValue = metaInfo[tableMeta.rowData[3]];
+
+          let param= "lastDiscountCode";
+          let retValue= '';
+          if(metaFieldValue){
+            retValue = metaFieldValue[param];
+          }
+
+
+          //let code = parseParams(tableMeta.rowData[3], "lastDiscountCode");
           return (
           <div>
-
-
+            
             <FormControl variant="outlined" className={classes.formControl}>
-              <InputLabel htmlFor="outlined-age-native-simple">Age</InputLabel>
+              <InputLabel htmlFor="outlined-age-native-simple">Code</InputLabel>
               <Select
                 native
-                value={4}
-                //onChange={handleChange}
+                value={retValue}
+                onChange={(e) => {
+                  e.target.value;
+                  updateParams(tableMeta.rowData[3], "lastDiscountCode", e.target.value);
+                }}
                 label="Code"
                 inputProps={{
                   name: 'Code',
@@ -642,7 +659,7 @@ const AbandonCart = () => {
             <button onClick={(e) => {
 
               e.preventDefault();
-
+              console.log(tableMeta.rowData);
               updateMsg(tableMeta.rowData[3], "msg1");
             }}>
 
@@ -755,7 +772,7 @@ const AbandonCart = () => {
     <div>
       <button onClick={getMetaFields}>GQL</button>
 
-      {/* <MessageTemplate></MessageTemplate> */}
+      <MessageTemplate ></MessageTemplate>
       {data1.length > 0 &&
       <MUIDataTable
         title={"Abandoned Cart Recovery"}
@@ -764,7 +781,6 @@ const AbandonCart = () => {
             item?.customer?.first_name + " " + item?.customer?.last_name + " " + item?.id,
             item?.created_at,
             item?.currency + " " + item?.total_price,
-            
             item?.id,
             ,
             item?.id
