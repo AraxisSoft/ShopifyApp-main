@@ -20,7 +20,33 @@ const port = parseInt(process.env.PORT, 10) || 3000;
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
+const getMetafieldValue=(namespace,key)=>{
+  const results = await fetch("https://" + ctx.cookies.get('shopOrigin') + "/admin/api/2020-10/metafields/"+key+".json/", {
+    headers: {
+      "X-Shopify-Access-Token": ctx.cookies.get('accessToken'),
+    },
+  })
+  .then(response => response.json())
+  .then(json => {
+    return json;
+  });
 
+}
+const setMetafieldValue=(namespace,key)=>{
+  const results = await fetch("https://" + ctx.cookies.get('shopOrigin') + "/admin/api/2020-10/metafields.json", {
+    method: 'POST',
+    headers: {
+      "X-Shopify-Access-Token": ctx.cookies.get('accessToken'),
+      'Content-Type': 'application/json',
+    },
+    body:JSON.stringify(ctx.request.body),
+  },)
+  .then(response => response.json())
+  .then(json => {
+    return json;
+  });
+
+}
 const { SHOPIFY_API_SECRET_KEY, SHOPIFY_API_KEY, HOST} = process.env;
 const getSubscriptionUrl = async (accessToken, shop, returnUrl = process.env.HOST) => {
   const query = JSON.stringify({
@@ -153,6 +179,17 @@ const router = new Router();
     console.log(err)
   }
 });
+router.get('/api/redirect/:social/*',async (ctx)=>{
+  try {
+
+    console.log(ctx.params);
+    console.log(ctx.request.querystring)
+    ctx.redirect(ctx.params[0]+"?"+ctx.request.querystring)
+  }
+  catch (err) {
+    console.log(err)
+  }
+})
 
 router.get('/api/:object', async (ctx) => {
   console.log("Inside");
@@ -311,15 +348,7 @@ router.post('/api/:object',bodyParser, async (ctx) => {
     console.log(err)
   }
 })
-router.get('api/redirect/:social/:url',async (ctx)=>{
-  try {
-    console.log(ctx.params.social+" "+ctx.params.url);
-    ctx.redirect(ctx.params.url)
-  }
-  catch (err) {
-    console.log(err)
-  }
-})
+
 router.put('/api/:object',bodyParser, async (ctx) => {
   try {
     console.log("https://" + ctx.cookies.get('shopOrigin') + "/admin/api/2020-10/" + ctx.params.object + ".json")
