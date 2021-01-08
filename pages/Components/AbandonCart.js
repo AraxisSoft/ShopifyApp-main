@@ -117,20 +117,39 @@ const AbandonCart = () => {
   //const [addTodo, {  loading: mutationLoading, error: mutationError, data:mutationData }] = useMutation(ADD_TODO);
   const { called: discountCalled, loading: discountLoading, data: discountData, error: discountError } = useQuery(
     GET_DISCOUNTCODE,
+{
+    onCompleted: allDiscountData => {
+    let allDiscounts = [];
+    if (allDiscountData && allDiscountData.priceRules) {
+      for (var i = 0; i < allDiscountData?.priceRules?.edges?.length; i++) {
+        let currNode = allDiscountData?.priceRules?.edges[i];
+        for (var j = 0; j < currNode.node.discountCodes.edges.length; j++) {
+          let discCode = currNode?.node?.discountCodes?.edges[j]?.node?.code;
+          allDiscounts.push(discCode);
+        }
+      }
+    }
+    setDiscounts(allDiscounts);
+    console.log(allDiscounts);
+  },
+  onError: err => {
+   console.log('onError'+err);
+  },
+}
   );
 
   const {  loading: metaLoading, data: metaData, error: metaError } = useQuery(
     GET_METAFIELD,
     { variables: { namespace: "messages" }, 
-      onCompleted: data => {
-        console.log(data);
+      onCompleted: returnedData => {
+        console.log(returnedData);
         console.log('onComplete');
         const obj = {};
-      if(data && data.shop.metafields.edges){
-        for (var i = 0; i <  data.shop.metafields.edges.length; i++) {
-          if (data.shop.metafields.edges[i].node) {
-            const k = data.shop.metafields.edges[i].node.key;
-            const v = data.shop.metafields.edges[i].node.value;
+      if(returnedData){
+        for (var i = 0; i <  returnedData?.shop?.metafields?.edges?.length; i++) {
+          if (returnedData?.shop?.metafields?.edges[i]?.node) {
+            const k = returnedData?.shop?.metafields?.edges[i]?.node?.key;
+            const v = returnedData?.shop?.metafields?.edges[i]?.node?.value;
             obj[k] = v;
             console.log("k v " + k + " " + v + obj);
           }
@@ -151,16 +170,7 @@ const AbandonCart = () => {
 
   const classes = useStyles();
 
-  if (discountError) {
-    console.log("discountError" + discountError);
-
-  }
-  if (discountData) {
-    
-
-
-  }
-
+  
   //const getMetaFields = () => loadMetafields({ variables: { ... } })
 
   const getMetaFields = () => {
@@ -180,13 +190,13 @@ const AbandonCart = () => {
 
   };
 
-  if (data) {
-    console.log("INSIDE WARNINGGGGGGGGGGGG " + JSON.stringify(data));
-    const ab = data.shop.metafields.edges[0].node.value;
-    console.log(ab + JSON.stringify(ab));
-    console.log(data.shop.metafields.edges[0].node.value);
+  // if (data) {
+  //   console.log("INSIDE WARNINGGGGGGGGGGGG " + JSON.stringify(data));
+  //   const ab = data.shop.metafields.edges[0].node.value;
+  //   console.log(ab + JSON.stringify(ab));
+  //   console.log(data.shop.metafields.edges[0].node.value);
 
-  }
+  // }
 
 
   const saveMsgStatus = async (cart_id, value) => {
@@ -259,7 +269,7 @@ const AbandonCart = () => {
       //console.log("JSON.parse"+result);
       //result=  JSON.parse(result);
 
-      if (result && result.tag) {
+      if (result && (result.tag || ("tag" in result))) {
         result.tag = arr;     //=>THROWS AN ERROR OF TAG ON STRING
       }
 
@@ -373,7 +383,43 @@ const AbandonCart = () => {
     }
 
 
-    const parseParams = (param) => {
+    const parseParams = (key, param, type, value) => {
+
+      let tempState = null;
+      try {
+        tempState = JSON.parse(metaInfo);
+      } catch (e) {
+        tempState = metaInfo;
+      }
+
+      let tempState1 = null;
+      try {
+        tempState1 = JSON.parse(tempState[key]);
+      } catch (e) {
+        tempState1 = tempState[key];
+      }
+
+
+      if (tempState1) {
+      
+        let result = tempState[key];
+  
+        //console.log("W JSON.parse"+JSON.stringify(result));
+        //console.log("W JSON.parse"+result); // 0 OR 1 0-> not sent || 1 -> sent
+  
+        try {
+          result = JSON.parse(result);
+        } catch (e) {
+          console.log(result+ e);
+        }
+
+//check and correct it , valid syntax to check child of object etc
+        if (result && ( param in result)) {
+          result[param] = arr;     //=>THROWS AN ERROR OF TAG ON STRING
+        }
+      }
+
+
 
 
 
@@ -385,29 +431,29 @@ const AbandonCart = () => {
 
 
 
-  const test = useCallback(async () => {
+  // const test = useCallback(async () => {
 
-    try {
-      const obj = {};
-      const res = await api.get('/metafields');
-      console.log(res);
-      for (var i = 0; i < res.data.data.metafields.length; i++) {
-        if (res.data.data.metafields[i].namespace === "messages") {
-          const k = res.data.data.metafields[i].key;
-          const v = res.data.data.metafields[i].value;
-          obj[k] = v;
-          console.log("k v " + k + " " + v + obj);
-        }
-      }
-      setMetaInfo(JSON.stringify(obj));
-      //console.log("final metainfo "+metaInfo[18611289424066]  );
-    }
-    catch (err) {
-      console.log(err);
-    }
+  //   try {
+  //     const obj = {};
+  //     const res = await api.get('/metafields');
+  //     console.log(res);
+  //     for (var i = 0; i < res.data.data.metafields.length; i++) {
+  //       if (res.data.data.metafields[i].namespace === "messages") {
+  //         const k = res.data.data.metafields[i].key;
+  //         const v = res.data.data.metafields[i].value;
+  //         obj[k] = v;
+  //         console.log("k v " + k + " " + v + obj);
+  //       }
+  //     }
+  //     setMetaInfo(JSON.stringify(obj));
+  //     //console.log("final metainfo "+metaInfo[18611289424066]  );
+  //   }
+  //   catch (err) {
+  //     console.log(err);
+  //   }
 
 
-  }, []);
+  // }, []);
 
   const getAbandonedCarts = useCallback(async () => {
     const res = await api.get('/checkouts');
@@ -415,7 +461,8 @@ const AbandonCart = () => {
     console.log(res);
     if (res.data.data.checkouts) {
       console.log("IN RESP " + res);
-      setData1(res.data.data.checkouts);
+      setData1(res?.data?.data?.checkouts);
+      console.log("DATAAAAAAAAAAAAAAAAAAAAAAAAA1"+JSON.stringify(data1))
     }
 
   }, []);
@@ -424,24 +471,8 @@ const AbandonCart = () => {
     getAbandonedCarts();
     //test();
     console.log("        useEffect       Called");
-    console.log(discountData);
-    let allDiscounts = [];
-    if (discountData && discountData.priceRules.edges) {
-      for (var i = 0; i < discountData.priceRules.edges.length; i++) {
-        let currNode = discountData.priceRules.edges[i];
-        for (var j = 0; j < currNode.node.discountCodes.edges.length; j++) {
-          let discCode = currNode.node.discountCodes.edges[j].node.code;
-          allDiscounts.push(discCode);
-        }
-      }
-    }
-    setDiscounts(allDiscounts);
-    console.log(allDiscounts);
 
-
-
-
-  }, [metaData, discountData])
+  }, [])
 
   // const discountItems = state1.map((number) =>
   // <option value={number}>{number}</option>);
@@ -449,17 +480,17 @@ const AbandonCart = () => {
   const columns = [
     {
       label: "Checkout, User",
-      options: {
-        customBodyRender: (value, tableMeta, updateValue) => {
-          let arr = value;
-          arr = arr.split(' ');
-          console.log("INDEXXXXXXXXXXXXXXXXXXXX" +arr);
-          let hyperlink = window.location.href;
-          hyperlink = hyperlink.split('/');
-          hyperlink = Cookies.get('shopOrigin') + "/admin/checkouts/" + arr[2];
-          return <div> <a target="_blank" href={hyperlink}>Cart Details</a>  <span> {arr[0] + " " + arr[1]}</span></div>;
-        }
-      }
+      // options: {
+      //   customBodyRender: (value, tableMeta, updateValue) => {
+      //     let arr = value;
+      //     arr = arr.split(' ');
+      //     console.log("INDEXXXXXXXXXXXXXXXXXXXX" +arr);
+      //     let hyperlink = window.location.href;
+      //     hyperlink = hyperlink.split('/');
+      //     hyperlink = Cookies.get('shopOrigin') + "/admin/checkouts/" + arr?.[2];
+      //     //return <div> <a target="_blank" href={hyperlink}>Cart Details</a>  <span> {arr?.[0] + " " + arr?.[1]}</span></div>;
+      //   }
+      // }
     },
     {
       label: "Date",
@@ -467,41 +498,46 @@ const AbandonCart = () => {
         customBodyRender: (value, tableMeta, updateValue) => {
           let arr = value;
           arr = arr.split('T');
-          return arr[0];
+          console.log( arr?.[0]);
+          console.log("DATAAAAAAAAAAAAAAAAAAAAAAAAA1"+data1)
+          return arr?.[0];
         }
       }
     },
-    , "Amount", "Status",
+    "Amount", "Status",
     {
-      label: "Discount",
+      label: "Last Discount Applied",
       options: {
         customBodyRender: (value, tableMeta, updateValue) => {
-
-          
           return (
+          <div>
+
+
             <FormControl variant="outlined" className={classes.formControl}>
-              <InputLabel htmlFor="outlined-age-native-simple">Discount</InputLabel>
+              <InputLabel htmlFor="outlined-age-native-simple">Age</InputLabel>
               <Select
                 native
-                value={state.age}
-                onChange={(e) => {
-                  handleChange(e, tableMeta.rowData[3])
-                }}
-                label="Age"
+                value={4}
+                //onChange={handleChange}
+                label="Code"
                 inputProps={{
-                  name: 'age',
+                  name: 'Code',
                   id: 'outlined-age-native-simple',
                 }}
               >
                 <option aria-label="None" value="" />
-                {discountItems}
+                { discounts.map((number) =>
+  <option value={number}>{number}</option>
+)}
 
               </Select>
             </FormControl>
-          );
-        }
+          </div>
+          ); 
       }
-    },
+      }
+    }
+    ,
     {
       label: "TAGS",
       options: {
@@ -529,11 +565,12 @@ const AbandonCart = () => {
             c = b.tag.split(",");
             console.log("BBBBBBBB" + c + typeof c);
           }
-          //let c = b.tag.split(",");
-
+          
+          
 
 
           return (
+           
             <div>
               <FormControl className={classes.formControl}>
                 <InputLabel id="demo-mutiple-chip-label">Chip</InputLabel>
@@ -614,8 +651,6 @@ const AbandonCart = () => {
         }
       }
     }
-
-
     ,
     {
       label: "Message 2",
@@ -669,6 +704,7 @@ const AbandonCart = () => {
     expandableRows: true,
     renderExpandableRow: (rowData, rowMeta) => {
       console.log(rowData, rowMeta);
+      console.log("DATAAAAAAAAAAAAAAAAAAAAAAAAA1"+data1)
       return (
         <React.Fragment>
           <tr>
@@ -686,21 +722,21 @@ const AbandonCart = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    <TableRow key={data1[rowMeta.rowIndex].id}>
+                    <TableRow key={data1[rowMeta.rowIndex]?.id}>
                       <TableCell component="th" scope="row">
-                        {data1[rowMeta.rowIndex].referring_site}
+                        {data1[rowMeta.rowIndex]?.referring_site}
                       </TableCell>
                       <TableCell align="right">
-                        {data1[rowMeta.rowIndex].referring_site}
+                        {data1[rowMeta.rowIndex]?.referring_site}
                       </TableCell>
                       <TableCell align="right">
-                        {data1[rowMeta.rowIndex].total_discounts}
+                        {data1[rowMeta.rowIndex]?.total_discounts}
                       </TableCell>
                       <TableCell align="right">
-                        {data1[rowMeta.rowIndex].total_discounts}
+                        {data1[rowMeta.rowIndex]?.total_discounts}
                       </TableCell>
                       <TableCell align="right">
-                        {data1[rowMeta.rowIndex].total_discounts}
+                        {data1[rowMeta.rowIndex]?.total_discounts}
                       </TableCell>
                     </TableRow>
                   </TableBody>
@@ -719,17 +755,19 @@ const AbandonCart = () => {
     <div>
       <button onClick={getMetaFields}>GQL</button>
 
-      <MessageTemplate></MessageTemplate>
+      {/* <MessageTemplate></MessageTemplate> */}
       {data1.length > 0 &&
       <MUIDataTable
         title={"Abandoned Cart Recovery"}
         data={data1.map(item => {
           return [
-            item.customer.first_name + " " + item.customer.last_name + " " + item.id,
-            item.created_at,
-            item.currency + " " + item.total_price,
-            item.id,
-            item.id
+            item?.customer?.first_name + " " + item?.customer?.last_name + " " + item?.id,
+            item?.created_at,
+            item?.currency + " " + item?.total_price,
+            
+            item?.id,
+            ,
+            item?.id
 
           ]
         })}
