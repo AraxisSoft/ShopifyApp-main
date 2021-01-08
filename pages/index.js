@@ -24,14 +24,14 @@ export default function Home() {
 const [value,setValue]=useState('')
 const temp=[
   {
-    link:'https://www.facebook.com',
+    link:'apps/floatbutton/api/redirect/fb/https://www.facebook.com',
     logo:'twitter'
   },{
-    link:'https://web.whatsapp.com',
+    link:'apps/floatbutton/api/redirect/whatsapp1/https://web.whatsapp.com',
     logo:'twitter'
   },
   {
-    link:'https://web.whatsapp.com',
+    link:'apps/floatbutton/api/redirect/whatsapp2/https://web.whatsapp.com',
     logo:'twitter'
   }
 ]

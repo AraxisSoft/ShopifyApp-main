@@ -311,6 +311,15 @@ router.post('/api/:object',bodyParser, async (ctx) => {
     console.log(err)
   }
 })
+router.get('api/redirect/:social/:url',async (ctx)=>{
+  try {
+    console.log(ctx.params.social+" "+ctx.params.url);
+    ctx.redirect(ctx.params.url)
+  }
+  catch (err) {
+    console.log(err)
+  }
+})
 router.put('/api/:object',bodyParser, async (ctx) => {
   try {
     console.log("https://" + ctx.cookies.get('shopOrigin') + "/admin/api/2020-10/" + ctx.params.object + ".json")
