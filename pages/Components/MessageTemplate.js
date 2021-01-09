@@ -260,9 +260,8 @@ function MessageTemplate({parentComponent}) {
              <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
              <DialogTitle id="form-dialog-title">Edit Message</DialogTitle>
              <DialogContent>
-             <TextField autoFocus margin="dense" id="name" label="Message" fullWidth />
                     <div >
-                        <p >Content</p>
+                       
                         <InputLabel id="demo-simple-select-outlined-label">Variable</InputLabel>
                         <Select variant="outlined"
                             labelId="demo-simple-select-outlined-label"
@@ -272,7 +271,7 @@ function MessageTemplate({parentComponent}) {
                             onChange={handleChange}
                             label="Variable"
                         >
-                            <MenuItem value=""> Variable </MenuItem>
+                            {/* <MenuItem value=""> Variable </MenuItem> */}
                             <MenuItem value="{{first_name}}">First Name</MenuItem>
                             <MenuItem value="{{shop_name}}">Shop Name</MenuItem>
                             <MenuItem value="{{cart_items}}">Cart Items</MenuItem>
@@ -303,18 +302,9 @@ function MessageTemplate({parentComponent}) {
                             inputProps={{ 'aria-label': 'Checkbox A' }}
                         />
 
-                        Create discount code (creates a unique code for each customer)
+                        Apply discount code (Automatic Discount)
                     </div>
-                       <TextField
-                        id="filled-number"
-                        label="Number"
-                        type="number"
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        variant="outlined"
-                        fullWidth
-                        />
+                       
              </DialogContent>
              
         <DialogActions>
