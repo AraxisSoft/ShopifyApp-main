@@ -13,6 +13,9 @@ import MenuItem from '@material-ui/core/MenuItem';
 import {gql,useQuery ,useLazyQuery} from '@apollo/client';
 import ScrollMenu from "react-horizontal-scrolling-menu";
 import axios from 'axios';
+import { useSelector, useDispatch } from "react-redux";
+import { selectMsg1, selectMsg2, setMsg1, setMsg2 } from '../features/messageSlice';
+
 const api = axios.create({
   baseURL: '/api',
   headers: {
@@ -72,6 +75,11 @@ function MessageTemplate({parentComponent}) {
     const [open, setOpen] = useState(false); // for Dialogue box
     const [section, setSection] = useState(null); // Abandon | Review | Order Confirmation
 
+    const dispatch = useDispatch();
+    const msgText1 = useSelector(selectMsg1);
+    const msgText2 = useSelector(selectMsg2);
+
+
     const [variable, setVariable] = useState(''); // For checkbox
     const [textBefore, setTextBefore]= useState('');
     const [textAfter, setTextAfter]= useState('');
@@ -88,8 +96,8 @@ function MessageTemplate({parentComponent}) {
     const [current,setCurrent]=useState(0);// 0 | 1 | 2
 
     //For Abandon | Review | Order Confirmation
-    const [msg1,setMsg1]=useState(null);
-    const [msg2,setMsg2]=useState(null);
+    // const [msg1,setMsg1]=useState(null);
+    // const [msg2,setMsg2]=useState(null);
 
     const [messages,setMessages]=useState(null);
 
@@ -105,6 +113,8 @@ function MessageTemplate({parentComponent}) {
 
     useEffect(() => {
         setNamespace(parentComponent);
+        updateMsgTemplate
+
     },[])
     // useEffect(() => {
     //     setNamespace(parentComponent);
@@ -192,12 +202,16 @@ function MessageTemplate({parentComponent}) {
       const handleClose = () => {
         setOpen(false);
         saveMsgTemplate();
+        dispatch(setMsg1(msgContent));
+  
       };
 
       const updateMsgTemplate = (msgNum) =>{
         console.log("OPEN");
         setOpen(true);
         console.log(messages);
+        
+        
         if(current === 1){
             if(messages && messages.shop.metafields.edges.length>0){
                 setMsgContent( data.shop.metafields.edges[0].node.value);
@@ -214,6 +228,7 @@ function MessageTemplate({parentComponent}) {
                 setMsgContent(allConstants.confirmation1);
 
             }
+            dispatch(setMsg1(msgContent));
 
         }
         else if(current === 2 ){
@@ -232,6 +247,7 @@ function MessageTemplate({parentComponent}) {
                 setMsgContent(allConstants.confirmation2);
 
             }
+            dispatch(setMsg2(msgContent));
         }
 
       }

@@ -60,21 +60,7 @@ const AbandonedCart = () => {
     const tempvar = 'arsal';
     const [num1, setNum1] =useState(null);
     const [operator, setOperator1] =useState(null);
-    
-  function replaceit(str, find, replace) {
-    let parts = str.split(find);
-    console.log(parts);
-    const result = [];
-    for(let i = 0;  i < parts.length; i++) {
-        result.push(parts[i]);
-        
-        result.push(replace);
-    }
-    result.pop(replace);
-    return (
-        result
-    );
-    }
+  
 
     const ab = ()=>{
       let res = replaceit("{{shop_name}}: Hi {{first_name}}, looks like you left some great items in your cart 🤗", "{{shop_name}}", "tfm");

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useContext, createContext } from 'react';
 import MUIDataTable from "mui-datatables";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
@@ -18,7 +18,10 @@ import Select from '@material-ui/core/Select';
 import Chip from '@material-ui/core/Chip';
 import MessageTemplate from './MessageTemplate';
 import { gql, useLazyQuery, useQuery } from '@apollo/client';
+import { useSelector, useDispatch } from "react-redux";
 
+import { selectMsg1, selectMsg2, setMsg1, setMsg2 } from '../features/messageSlice';
+import {replaceit} from '../HelperFunctions/allfunctions'
 
 import axios from 'axios';
 const api = axios.create({
@@ -65,7 +68,10 @@ query OrdersData($namespace: String!) {
 `;
 
 
-
+const msgConstants = {
+  abandon1: '{{shop_name}}: Hi {{first_name}}, we noticed there were a few items left in your shopping cart 🛒{{cart_items}} If you’re ready to complete your order, your cart awaits you at 👉 {{checkout_url}}',
+  abandon2: '{{shop_name}}: Hi {{first_name}}, looks like you left some great items in your cart 🤗 {{cart_items}} Still on the edge with your purchase? Here’s a {{discount}}% OFF if you complete your purchase now. Offer automatically applied at checkout. Thank you 👋 Let’s go 👉 {{checkout_url}}',
+};
 
 const useStyles = makeStyles((theme) => ({
   formControl: {
@@ -107,12 +113,23 @@ const allConstants = {
 
 const AbandonCart = () => {
 
+  // For Templates Only
+  const msgTemplate1 = useSelector(selectMsg1);
+  const msgTemplate2 = useSelector(selectMsg2);
+
+  //
+  const [msgText1, setMsgText1] = useState(null);
+  const [msgText2, setMsgText2] = useState(null);
+ 
+
   const [data1, setData1] = useState([]);
   const [metaInfo, setMetaInfo] = useState({});
   const [tags, setTags] = useState(['Oliver Hansen', 'Van Henry', "2", "3", "4", "5"]);
   const [namespace, setNamespace] = useState('messages');
 
   const [discounts, setDiscounts] = useState([]);
+
+
 
   const abandonMetaField = {
     msg1: 0, // 0 OR 1 0-> not sent || 1 -> sent
@@ -410,6 +427,34 @@ const AbandonCart = () => {
 
     }
 
+
+    const sendMessage = (index) => {
+
+
+      replaceAllPlaceholders(index);
+
+      let url = "https://web.whatsapp.com/send?phone="+ data1[rowMeta.rowIndex]?.id +"?text="+msgText1;
+      const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
+      if (newWindow) newWindow.opener = null;
+
+
+
+
+    }
+
+    const replaceAllPlaceholders = (index) => {
+
+
+      variableList = ["{{first_name}}", "{{shop_name}}", "{{cart_items}}", "{{checkout_url}}", "{{order_value}}"];
+      replaceList = [data1[rowMeta.rowIndex]?.id , data1[rowMeta.rowIndex]?.id , data1[rowMeta.rowIndex]?.id , data1[rowMeta.rowIndex]?.id];
+      setMsgText1(msgTemplate1);
+      for (var i =0 ; i < variableList.length; i++){
+        let response = replaceit( msgText1,variableList[i],replaceList[i]);
+        setMsgText1(response);
+      }
+
+    }
+
     const updateParams = (key, param, value) => {
 
       let metaFieldValue = metaInfo[key];
@@ -426,14 +471,6 @@ const AbandonCart = () => {
       saveMsgStatus(key, metaFieldValue);
      
     }
-
-
-    
-
-  
-
-
-
 
   // const test = useCallback(async () => {
 
@@ -660,6 +697,7 @@ const AbandonCart = () => {
 
               e.preventDefault();
               console.log(tableMeta.rowData);
+              sendMessage(tableMeta.rowData);
               updateMsg(tableMeta.rowData[3], "msg1");
             }}>
 
