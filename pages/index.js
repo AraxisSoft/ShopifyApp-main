@@ -24,29 +24,33 @@ const client = new ApolloClient({
 });
 export default function Home() {
 const [value,setValue]=useState('')
-const temp=[
-  {
-    link:'https://www.facebook.com',
-    logo:'twitter'
-  },{
-    link:'https://web.whatsapp.com',
-    logo:'twitter'
-  },
-  {
-    link:'https://web.whatsapp.com',
-    logo:'twitter'
-  }
-]
+
 const handleChange=(event)=> {
   setValue(event.target.value);
 }
 const handleSubmit=async(event)=> {
-  console.log(value);
   event.preventDefault();
+  let shopOrigin = await api.get('/shoporigin');
+  shopOrigin=shopOrigin.data.data
+  const temp=[
+    {
+      link:`apps/floatbutton/api/redirect/${shopOrigin}/fb/https://www.facebook.com`,
+      logo:'twitter'
+    },{
+      link:`apps/floatbutton/api/redirect/${shopOrigin}/whatsapp1/https://web.whatsapp.com`,
+      logo:'twitter'
+    },
+    {
+      link:`apps/floatbutton/api/redirect/${shopOrigin}/whatsapp2/https://web.whatsapp.com`,
+      logo:'twitter'
+    }
+  ]
+  console.log(value);
+  
   const obj={
     "metafield": {
       namespace: "floatButton",
-      key: "test",
+      key: "config",
       value: JSON.stringify(temp),
       value_type: "json_string"
     }
@@ -55,8 +59,10 @@ const handleSubmit=async(event)=> {
   console.log(res.data);
 }
   const test=async ()=>{
-    console.log("hi");
+    console.log("hi updated");
     try{
+      let count=await api.get('/getsocialcount')
+      console.log(count);
     let data = await api.get('/metafields');
     console.log(data);
     }
@@ -133,7 +139,23 @@ const handleSubmit=async(event)=> {
       console.log(err);
     }
   }
-
+const saveShopData=async ()=>{
+  console.log("shop origin index");
+  const shopOrigin = await api.get('/shoporigin');
+  const temp={
+    shopOrigin:shopOrigin.data.data,
+  }
+  const obj={
+    "metafield": {
+      namespace: "floatButton",
+      key: "shopOrigin",
+      value: JSON.stringify(temp),
+      value_type: "json_string"
+    }
+  }
+  const res = await api.post('/metafields', obj);
+  console.log(res.data);
+}
   const uploadAssets=async (filename,path)=>{
     try{
       console.log("uploading "+filename);
@@ -157,7 +179,7 @@ const handleSubmit=async(event)=> {
       
       uploadAssets('socialmedia.css','assets/socialmedia.css')
       uploadAssets('twitter.svg','assets/twitter.svg')
-
+      //saveShopData()
     //console.log(themeData);
     
   
@@ -177,18 +199,17 @@ const handleSubmit=async(event)=> {
   }
   return (
     <div>
-      {/* <h1>Hello World</h1>
+      <h1>Hello World</h1>
       <button onClick={test}>Hello</button>
-      <button onClick={install}>Install</button> */}
-      <h1>Hello World1</h1>
+      <button onClick={install}>Install</button> 
       {/* <AbandonedCart/> */}
-      {/* <form onSubmit={handleSubmit}>
+       <form onSubmit={handleSubmit}>
         <label>
           Name:
           <input type="text" value={value} onChange={handleChange} />
         </label>
         <input type="submit" value="Submit" />
-      </form> */}
+      </form> 
 
       {/* HERE NEW START */}
       <Provider store={store}>

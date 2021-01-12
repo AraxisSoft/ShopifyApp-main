@@ -8,8 +8,43 @@ const session = require('koa-session');
 const Router = require('koa-router');
 const {receiveWebhook, registerWebhook} = require('@shopify/koa-shopify-webhooks');
 const { log } = require('console');
-
-
+//firebase
+const { admin, db } = require('./util/admin');
+const config = require('./util/config');
+const firebase = require('firebase');
+firebase.initializeApp(config);
+// const signin=async()=>{
+//   const data = await firebase
+//       .auth()
+//       .signInWithEmailAndPassword("abdulrehman1937@gmail.com", "ASnvjkdnuABC@09v74nx");
+// }
+const incrementSocial=async (user,social)=>{
+  
+  try{
+  let finalobj={};
+//await signin()
+  let obj=await db.doc(`/${user}/social`).get();
+  if (obj.exists) {
+      finalobj=obj.data();
+      if (social in finalobj){
+        finalobj[social]=parseInt(finalobj[social])+1
+      }
+      else{
+        finalobj[social]=1
+      }
+      
+  }
+  else{
+    finalobj[social]=1
+  }
+  console.log(finalobj);
+  await db.doc(`/${user}/social`).set(finalobj)
+  console.log("success");
+}
+catch(err){
+  console.log(err);
+}
+}
 var bodyParser = require('koa-body')();
 dotenv.config();
 const { default: graphQLProxy } = require('@shopify/koa-shopify-graphql-proxy');
@@ -20,7 +55,33 @@ const port = parseInt(process.env.PORT, 10) || 3000;
 const dev = process.env.NODE_ENV !== 'production';
 const app = next({ dev });
 const handle = app.getRequestHandler();
+const getMetafieldValue=async (namespace,key)=>{
+  const results = await fetch("https://" + ctx.cookies.get('shopOrigin') + "/admin/api/2020-10/metafields/"+key+".json/", {
+    headers: {
+      "X-Shopify-Access-Token": ctx.cookies.get('accessToken'),
+    },
+  })
+  .then(response => response.json())
+  .then(json => {
+    return json;
+  });
 
+}
+const setMetafieldValue=async (namespace,key)=>{
+  const results = await fetch("https://" + ctx.cookies.get('shopOrigin') + "/admin/api/2020-10/metafields.json", {
+    method: 'POST',
+    headers: {
+      "X-Shopify-Access-Token": ctx.cookies.get('accessToken'),
+      'Content-Type': 'application/json',
+    },
+    body:JSON.stringify(ctx.request.body),
+  },)
+  .then(response => response.json())
+  .then(json => {
+    return json;
+  });
+
+}
 const { SHOPIFY_API_SECRET_KEY, SHOPIFY_API_KEY, HOST} = process.env;
 const getSubscriptionUrl = async (accessToken, shop, returnUrl = process.env.HOST) => {
   const query = JSON.stringify({
@@ -138,7 +199,29 @@ const router = new Router();
    console.log('received webhook: ', ctx.state.webhook);
    console.log('received webhook: ', ctx.state.webhook.topic);
  });
-
+ 
+  router.get('/api/getsocialcount', async (ctx) => {
+    try {
+      //await signin()
+      let obj=await db.doc(`/${ctx.cookies.get('shopOrigin')}/social`).get();
+ if (obj.exists) {
+  ctx.body = {
+    status: 'success',
+    data: obj.data()
+  };
+  return
+ }
+      ctx.body = {
+        status: 'success',
+        data: "Data does not exists"
+      };
+      return
+    } 
+  
+    catch (err) {
+      console.log(err)
+    }
+  });
  router.get('/test', async (ctx) => {
   try {
     console.log("hehe got hit");
@@ -153,6 +236,30 @@ const router = new Router();
     console.log(err)
   }
 });
+router.get('/api/shoporigin',bodyParser, async (ctx) => {
+  try {
+    console.log("in shop origin "+ctx.cookies.get('shopOrigin') );
+    ctx.body = {
+      status: 'success',
+      data: ctx.cookies.get('shopOrigin'),
+    };
+    return
+  } catch (err) {
+    console.log(err)
+  }
+})
+router.get('/api/redirect/:user/:social/*',async (ctx)=>{
+  try {
+
+    console.log(ctx.params);
+    console.log(ctx.request.querystring)
+    await incrementSocial(ctx.params.user,ctx.params.social)
+    ctx.redirect(ctx.params[0]+"?"+ctx.request.querystring)
+  }
+  catch (err) {
+    console.log(err)
+  }
+})
 
 router.get('/api/:object', async (ctx) => {
   console.log("Inside");
@@ -272,6 +379,7 @@ return
 })
 router.get('/api/load/file/:ext', async (ctx) => {
   try {
+    fs = require('fs');
     const util = require('util');
 const readFile = (fileName) => util.promisify(fs.readFile)(fileName, 'utf8');
 
@@ -287,6 +395,7 @@ const readFile = (fileName) => util.promisify(fs.readFile)(fileName, 'utf8');
     console.log(err)
   }
 })
+
 router.post('/api/:object',bodyParser, async (ctx) => {
   try {
     console.log("https://" + ctx.cookies.get('shopOrigin') + "/admin/api/2020-10/" + ctx.params.object + ".json")
@@ -311,6 +420,7 @@ router.post('/api/:object',bodyParser, async (ctx) => {
     console.log(err)
   }
 })
+
 router.put('/api/:object',bodyParser, async (ctx) => {
   try {
     console.log("https://" + ctx.cookies.get('shopOrigin') + "/admin/api/2020-10/" + ctx.params.object + ".json")
