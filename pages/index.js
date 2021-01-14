@@ -200,16 +200,16 @@ const saveShopData=async ()=>{
   return (
     <div>
       <h1>Hello World</h1>
-      <button onClick={test}>Hello</button>
-      <button onClick={install}>Install</button> 
+      {/* <button onClick={test}>Hello</button>
+      <button onClick={install}>Install</button>  */}
       {/* <AbandonedCart/> */}
-       <form onSubmit={handleSubmit}>
+       {/* <form onSubmit={handleSubmit}>
         <label>
           Name:
           <input type="text" value={value} onChange={handleChange} />
         </label>
         <input type="submit" value="Submit" />
-      </form> 
+      </form>  */}
 
       {/* HERE NEW START */}
       <Provider store={store}>

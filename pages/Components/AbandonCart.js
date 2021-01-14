@@ -221,18 +221,10 @@ const AbandonCart = () => {
 
   };
 
-  // if (data) {
-  //   console.log("INSIDE WARNINGGGGGGGGGGGG " + JSON.stringify(data));
-  //   const ab = data.shop.metafields.edges[0].node.value;
-  //   console.log(ab + JSON.stringify(ab));
-  //   console.log(data.shop.metafields.edges[0].node.value);
-
-  // }
 
 
   const saveMsgStatus = async (cart_id, value) => {
     //console.log(cart_id); 
-
 
     const obj = {
       "metafield": {
@@ -247,254 +239,85 @@ const AbandonCart = () => {
     //console.log(res.data);
   }
 
+ 
 
-  const saveDiscount = (discountCode, key) => {
-    let allDiscounts = [];
-    // for (var i = 0; i < discountData.priceRules.edges.length; i++) {
-    //   let currNode = discountData.priceRules.edges[i];
-    //   for (var j =0 ; j < currNode.node.discountCodes.edges.length;j++ ){
-    //     let discCode = currNode.node.discountCodes.edges[j].node.code;
-    //     allDiscounts.push(discCode);
-    //   }
-    // }
-    // setDiscounts(allDiscounts);
-    // console.log(allDiscounts);
+  const updateParams = (key, param, value) => {
 
+    let tempState = metaInfo;
+    let metaFieldValue = tempState[key];
+   
+    if(metaFieldValue){
+       metaFieldValue[param]= value;
+    }else{
+      //default metafield for newly created
+      metaFieldValue = abandonMetaField;
+      metaFieldValue[param]=value; //updated value
+    }
+
+    tempState[key]=metaFieldValue;
+    setMetaInfo({...metaInfo, key: metaFieldValue });
+    console.log(metaInfo);
+    saveMsgStatus(key, metaFieldValue);
+   
   }
-
 
   const handleChange = (event, key) => {
 
     let arr = event.target.value + '';
-    let temp = null;
-
-    // metaInfo[key].tag = event.target.value;
-    let tempState = null;
-    try {
-      tempState = JSON.parse(metaInfo);
-    } catch (e) {
-      tempState = metaInfo;
-    }
-
-    let tempState1 = null;
-    try {
-      tempState1 = JSON.parse(tempState[key]);
-    } catch (e) {
-      tempState1 = tempState[key];
-    }
-    if (tempState1) {
-      console.log("tempState1" + tempState1);
-      let result = tempState[key];
-
-      //console.log("W JSON.parse"+JSON.stringify(result));
-      //console.log("W JSON.parse"+result); // 0 OR 1 0-> not sent || 1 -> sent
-
-      try {
-        result = JSON.parse(result);
-      } catch (e) {
-        console.log(result+ e);
-      }
-      //console.log(result.tag);
-
-      // result.tag=event.target.value;  =>THROWS AN ERROR OF TAG ON STRING
-      //console.log("JSON.parse"+result);
-      //result=  JSON.parse(result);
-
-      if (result && (result.tag || ("tag" in result))) {
-        result.tag = arr;     //=>THROWS AN ERROR OF TAG ON STRING
-      }
-
-
-      tempState[key] = result;
-      //console.log("tempState"+JSON.stringify(tempState));
-
-      //tempState=JSON.parse(tempState);
-      setMetaInfo(JSON.stringify(tempState));
-      temp = {
-        msg1: result.msg1, // 0 OR 1 0-> not sent || 1 -> sent
-        msg2: result.msg2,
-        tag: result.tag
-      }
-      //saveMsgStatus(key, temp);
-    } else {
-      temp = {
-        msg1: 0, // 0 OR 1 0-> not sent || 1 -> sent
-        msg2: 0,
-        tag: arr
-      }
-
-    }
-    saveMsgStatus(key, temp);
-    //console.log(temp);
-
+    updateParams(key, "tag", arr);
+    
+  
   };
+
+  const parseParams = (key, param) => {
+
+    let metaFieldValue = metaInfo[key];
+
+    let retValue= null;
+    if(metaFieldValue){
+      retValue = metaFieldValue[param];
+    }
+
+    return retValue;
+
+  }
 
   const updateMsg = (key, msgNum) => {
 
+    let val = parseParams(key, msgNum);
 
-    let temp = null;
-    let tempState = null;
-    try {
-      tempState = JSON.parse(metaInfo);
-    } catch (e) {
-      tempState = metaInfo;
+    if(val !== 1){
+      updateParams(key, msgNum, 1);
     }
-
-    let tempState1 = null;
-    try {
-      tempState1 = JSON.parse(tempState[key]);
-    } catch (e) {
-      tempState1 = tempState[key];
-    }
-    if (tempState1) {
-      console.log("tempState1" + tempState1);
-      let result = tempState[key];
-
-      try {
-        result = JSON.parse(result);
-      } catch (e) {
-        console.log(result + e);
-      }
-      if (msgNum === allConstants.msg_1) {
-        if ("1" !== result.msg1) {
-          result.msg1 = "1";
-
-          tempState[key] = result;
-          console.log("tempState" + JSON.stringify(tempState));
-
-          //tempState=JSON.parse(tempState);
-          setMetaInfo(JSON.stringify(tempState));
-          temp = {
-            msg1: result.msg1, // 0 OR 1 0-> not sent || 1 -> sent
-            msg2: result.msg2,
-            tag: result.tag
-          }
-        }
-        
-        saveMsgStatus(key, temp);
-      } else {
-        if ("1" !== result.msg2) {
-          result.msg2 = "1";
   
-          tempState[key] = result;
-          console.log("tempState" + JSON.stringify(tempState));
-  
-          //tempState=JSON.parse(tempState);
-          setMetaInfo(JSON.stringify(tempState));
-          const temp = {
-            msg1: result.msg1, // 0 OR 1 0-> not sent || 1 -> sent
-            msg2: result.msg2,
-            tag: result.tag
-          }
-          saveMsgStatus(key, temp);
-        }
-  
-
-
-
     }
-  } else {
-        if (msgNum === allConstants.msg_1) {
-          temp = {
-            msg1: 1, // 0 OR 1 0-> not sent || 1 -> sent
-            msg2: 0,
-            tag: ''
-          }
-        } else {
-          temp = {
-            msg1: 0, // 0 OR 1 0-> not sent || 1 -> sent
-            msg2: 1,
-            tag: ''
-          }
-        }
-        saveMsgStatus(key, temp);
-      }
-
-
-    }
-
-
-    const parseParams = (key, param) => {
-
-      let metaFieldValue = metaInfo[key];
-
-      let retValue= null;
-      if(metaFieldValue){
-        retValue = metaFieldValue[param];
-      }
-
-      return retValue;
-
-    }
-
-
     const sendMessage = (index) => {
 
+      let finalMsg = replaceAllPlaceholders(index);
 
-      replaceAllPlaceholders(index);
-
-      let url = "https://web.whatsapp.com/send?phone="+ data1[rowMeta.rowIndex]?.id +"?text="+msgText1;
+      let url = "https://web.whatsapp.com/send?phone="+ data1[index]?.phone +"?text="+finalMsg;
       const newWindow = window.open(url, '_blank', 'noopener,noreferrer')
       if (newWindow) newWindow.opener = null;
 
 
-
-
     }
+ 
 
     const replaceAllPlaceholders = (index) => {
-
-
-      variableList = ["{{first_name}}", "{{shop_name}}", "{{cart_items}}", "{{checkout_url}}", "{{order_value}}"];
-      replaceList = [data1[rowMeta.rowIndex]?.id , data1[rowMeta.rowIndex]?.id , data1[rowMeta.rowIndex]?.id , data1[rowMeta.rowIndex]?.id];
-      setMsgText1(msgTemplate1);
+      
+      let variableList = ["{{first_name}}", "{{shop_name}}", "{{checkout_url}}", "{{order_value}}"];
+      let replaceList = [data1[index]?.customer?.first_name , data1[index]?.currency+ " " + data1[index]?.total_price , data1[index]?.web_url , data1[index]?.id];
+      let localMsg = msgTemplate1;
       for (var i =0 ; i < variableList.length; i++){
-        let response = replaceit( msgText1,variableList[i],replaceList[i]);
-        setMsgText1(response);
+        localMsg = replaceit( localMsg,variableList[i],replaceList[i]);
+       
       }
+      return localMsg;
 
     }
 
-    const updateParams = (key, param, value) => {
+    
 
-      let metaFieldValue = metaInfo[key];
-     
-      if(metaFieldValue){
-         metaFieldValue[param]= value;
-      }else{
-        //default metafield for newly created
-        metaFieldValue = abandonMetaField;
-        metaFieldValue[param]=value; //updated value
-      }
-
-      metaInfo[key]=metaFieldValue;
-      saveMsgStatus(key, metaFieldValue);
-     
-    }
-
-  // const test = useCallback(async () => {
-
-  //   try {
-  //     const obj = {};
-  //     const res = await api.get('/metafields');
-  //     console.log(res);
-  //     for (var i = 0; i < res.data.data.metafields.length; i++) {
-  //       if (res.data.data.metafields[i].namespace === "messages") {
-  //         const k = res.data.data.metafields[i].key;
-  //         const v = res.data.data.metafields[i].value;
-  //         obj[k] = v;
-  //         console.log("k v " + k + " " + v + obj);
-  //       }
-  //     }
-  //     setMetaInfo(JSON.stringify(obj));
-  //     //console.log("final metainfo "+metaInfo[18611289424066]  );
-  //   }
-  //   catch (err) {
-  //     console.log(err);
-  //   }
-
-
-  // }, []);
 
   const getAbandonedCarts = useCallback(async () => {
     const res = await api.get('/checkouts');
@@ -503,7 +326,7 @@ const AbandonCart = () => {
     if (res.data.data.checkouts) {
       console.log("IN RESP " + res);
       setData1(res?.data?.data?.checkouts);
-      console.log("DATAAAAAAAAAAAAAAAAAAAAAAAAA1"+JSON.stringify(data1))
+      console.log("DATAAAAAAAAAAAAAAAAAAAAAAAAA1 "+ data1);
     }
 
   }, []);
@@ -514,9 +337,7 @@ const AbandonCart = () => {
     console.log("        useEffect       Called");
 
   }, [])
-
-  // const discountItems = state1.map((number) =>
-  // <option value={number}>{number}</option>);
+ 
 
   const columns = [
     {
@@ -551,7 +372,7 @@ const AbandonCart = () => {
       options: {
         customBodyRender: (value, tableMeta, updateValue) => {
 
-          let metaFieldValue = metaInfo[tableMeta.rowData[3]];
+          let metaFieldValue = metaInfo?.[tableMeta.rowData?.[3]];
 
           let param= "lastDiscountCode";
           let retValue= '';
@@ -565,7 +386,7 @@ const AbandonCart = () => {
           <div>
             
             <FormControl variant="outlined" className={classes.formControl}>
-              <InputLabel htmlFor="outlined-age-native-simple">Code</InputLabel>
+              <InputLabel htmlFor="outlined-age-native-simple"></InputLabel>
               <Select
                 native
                 value={retValue}
@@ -573,9 +394,9 @@ const AbandonCart = () => {
                   e.target.value;
                   updateParams(tableMeta.rowData[3], "lastDiscountCode", e.target.value);
                 }}
-                label="Code"
+                label=""
                 inputProps={{
-                  name: 'Code',
+                  name: '',
                   id: 'outlined-age-native-simple',
                 }}
               >
@@ -595,7 +416,6 @@ const AbandonCart = () => {
     {
       label: "TAGS",
       options: {
-
         customBodyRender: (value, tableMeta, updateValue) => {
           const localtags = metaInfo;
           console.log("localtags" + metaInfo);
@@ -607,9 +427,9 @@ const AbandonCart = () => {
           }
           let b = null;
           try {
-            b = JSON.parse(a[tableMeta.rowData[3]]);
+            b = JSON.parse( a?.[tableMeta.rowData?.[3]]);
           } catch (e) {
-            b = a[tableMeta.rowData[3]];
+            b = a?.[tableMeta.rowData?.[3]];
           }
 
           // console.log("a "+ b.tag + "tag" );
@@ -620,8 +440,6 @@ const AbandonCart = () => {
             console.log("BBBBBBBB" + c + typeof c);
           }
           
-          
-
 
           return (
            
@@ -678,9 +496,9 @@ const AbandonCart = () => {
           }
           let b = null;
           try {
-            b = JSON.parse(a[tableMeta.rowData[3]]);
+            b = JSON.parse( a?.[tableMeta.rowData?.[3]]);
           } catch (e) {
-            b = a[tableMeta.rowData[3]];
+            b =  a?.[tableMeta.rowData?.[3]];
           }
 
           // console.log("a "+ b.tag + "tag" );
@@ -697,7 +515,7 @@ const AbandonCart = () => {
 
               e.preventDefault();
               console.log(tableMeta.rowData);
-              sendMessage(tableMeta.rowData);
+              sendMessage(tableMeta.rowData[3]);
               updateMsg(tableMeta.rowData[3], "msg1");
             }}>
 
@@ -721,9 +539,9 @@ const AbandonCart = () => {
           }
           let b = null;
           try {
-            b = JSON.parse(a[tableMeta.rowData[3]]);
+            b = JSON.parse( a?.[tableMeta.rowData?.[3]]);
           } catch (e) {
-            b = a[tableMeta.rowData[3]];
+            b =  a?.[tableMeta.rowData?.[3]];
           }
 
           // console.log("a "+ b.tag + "tag" );
@@ -810,7 +628,7 @@ const AbandonCart = () => {
     <div>
       <button onClick={getMetaFields}>GQL</button>
 
-      <MessageTemplate ></MessageTemplate>
+      <MessageTemplate section="Abandon" ></MessageTemplate>
       {data1.length > 0 &&
       <MUIDataTable
         title={"Abandoned Cart Recovery"}

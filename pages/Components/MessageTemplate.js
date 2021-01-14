@@ -71,9 +71,10 @@ const allConstants = {
    
   };
 
-function MessageTemplate({parentComponent}) {
+ // section ===> Abandon | Review | Order Confirmation
+function MessageTemplate({section}) {
     const [open, setOpen] = useState(false); // for Dialogue box
-    const [section, setSection] = useState(null); // Abandon | Review | Order Confirmation
+    
 
     const dispatch = useDispatch();
     const msgText1 = useSelector(selectMsg1);
@@ -86,8 +87,6 @@ function MessageTemplate({parentComponent}) {
     const [msgContent, setMsgContent]= useState(''); //
 
     const [namespace, setNamespace]= useState('');
-
-    
 
     const [checked, setChecked]= useState(false);
 
@@ -112,8 +111,10 @@ function MessageTemplate({parentComponent}) {
 
 
     useEffect(() => {
-        setNamespace(parentComponent);
-        updateMsgTemplate
+        setNamespace(section);
+        updateMsgTemplate("msg1");
+        updateMsgTemplate("msg2");
+        //updateMsgTemplate
 
     },[])
     // useEffect(() => {
@@ -208,11 +209,11 @@ function MessageTemplate({parentComponent}) {
 
       const updateMsgTemplate = (msgNum) =>{
         console.log("OPEN");
-        setOpen(true);
+        
         console.log(messages);
         
         
-        if(current === 1){
+        if(msgNum === "msg1"){
             if(messages && messages.shop.metafields.edges.length>0){
                 setMsgContent( data.shop.metafields.edges[0].node.value);
                 
@@ -231,7 +232,7 @@ function MessageTemplate({parentComponent}) {
             dispatch(setMsg1(msgContent));
 
         }
-        else if(current === 2 ){
+        else if(msgNum === "msg2"){
             if(messages && messages.shop.metafields.edges.length>1){
                 setMsgContent(data.shop.metafields.edges[1].node.value);
                 
@@ -257,17 +258,14 @@ function MessageTemplate({parentComponent}) {
             <div>
                 <button onClick={(e)=>{
                     e.preventDefault();
-                    console.log("OPEN");
-                    setCurrent(1);
+                    setOpen(true);
                     updateMsgTemplate( "msg1");
-                    
                 }
                     }>Edit Msg1</button>
 
                 <button onClick={(e)=>{
                     e.preventDefault();
-                    console.log("OPEN");
-                    setCurrent(2);
+                    setOpen(true);
                     updateMsgTemplate( "msg2");
                     
                 }
