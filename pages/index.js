@@ -211,7 +211,22 @@ const saveShopData=async ()=>{
         <input type="submit" value="Submit" />
       </form>  */}
 
+      
       {/* HERE NEW START */}
+
+      <AbandonCart/> {/*//route for cart*/}
+      <Stats/> {/*//route for All stats page*/}
+      <CodConfirmation/> {/*//route for CodConfirmation*/}
+      <Info></Info> {/*//route for all Info*/}
+      
+
+
+
+
+
+
+
+
       <Provider store={store}>
       <ApolloProvider client={client}>
       <AbandonCart/>
