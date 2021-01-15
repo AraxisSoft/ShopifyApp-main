@@ -16,6 +16,8 @@ import axios from 'axios';
 import { useSelector, useDispatch } from "react-redux";
 import { selectMsg1, selectMsg2, setMsg1, setMsg2 } from '../features/messageSlice';
 
+import {GET_METAFIELD} from '../GQL/GqlConstants'
+
 const api = axios.create({
   baseURL: '/api',
   headers: {

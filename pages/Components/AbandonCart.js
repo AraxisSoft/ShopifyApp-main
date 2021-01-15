@@ -23,6 +23,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { selectMsg1, selectMsg2, setMsg1, setMsg2 } from '../features/messageSlice';
 import {replaceit} from '../HelperFunctions/allfunctions'
 
+import {GET_DISCOUNTCODE, GET_METAFIELD} from '../GQL/GqlConstants'
+
 import axios from 'axios';
 const api = axios.create({
   baseURL: '/api',
