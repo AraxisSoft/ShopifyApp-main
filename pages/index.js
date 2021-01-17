@@ -2,13 +2,14 @@ import Head from 'next/head'
 import React,{useState} from 'react'
 import styles from '../styles/Home.module.css'
 import axios from 'axios';
-import AbandonedCart from './AbandonedCart'
-import AbandonCart from './Components/AbandonCart'
+import AbandonCart from './views/AbandonCart'
 import { ApolloProvider } from '@apollo/client';
 import ApolloClient from 'apollo-boost';
 import { InMemoryCache } from "apollo-cache-inmemory";
-import store from './app/store';
+import store from 'app/store';
+
 import { Provider } from 'react-redux';
+
 const api = axios.create({
   baseURL: '/api',
   headers: {

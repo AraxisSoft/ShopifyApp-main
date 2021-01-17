@@ -14,9 +14,9 @@ import {gql,useQuery ,useLazyQuery} from '@apollo/client';
 import ScrollMenu from "react-horizontal-scrolling-menu";
 import axios from 'axios';
 import { useSelector, useDispatch } from "react-redux";
-import { selectMsg1, selectMsg2, setMsg1, setMsg2 } from '../features/messageSlice';
+import { selectMsg1, selectMsg2, setMsg1, setMsg2 } from 'features/messageSlice';
 
-import {GET_METAFIELD} from '../GQL/GqlConstants'
+import {GET_METAFIELD} from 'Gql/GqlConstants'
 
 const api = axios.create({
   baseURL: '/api',
@@ -25,23 +25,6 @@ const api = axios.create({
   },
 });
 
-const GET_METAFIELD = gql`
-query OrdersData($namespace: String!) {
-    shop {
-       metafields(first:10, namespace: $namespace) {
-         edges {
-           node {
-             id
-             value
-             valueType
-             description
-             legacyResourceId
-           }
-         }
-       }
-     }
-   }
-`;
 
 const GET_DISCOUNTCODE = gql`
 {

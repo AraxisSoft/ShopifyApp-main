@@ -1,3 +1,5 @@
+
+import { gql} from '@apollo/client';
 export const GET_DISCOUNTCODE = gql`
 {
     priceRules (first:10) {

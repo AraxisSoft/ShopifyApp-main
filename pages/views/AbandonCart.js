@@ -20,10 +20,10 @@ import MessageTemplate from './MessageTemplate';
 import { gql, useLazyQuery, useQuery } from '@apollo/client';
 import { useSelector, useDispatch } from "react-redux";
 
-import { selectMsg1, selectMsg2, setMsg1, setMsg2 } from '../features/messageSlice';
-import {replaceit} from '../HelperFunctions/allfunctions'
+import { selectMsg1, selectMsg2, setMsg1, setMsg2 } from 'features/messageSlice';
+import {replaceit} from 'HelperFunctions/allfunctions'
 
-import {GET_DISCOUNTCODE, GET_METAFIELD} from '../GQL/GqlConstants'
+import {GET_DISCOUNTCODE, GET_METAFIELD} from 'Gql/GqlConstants'
 
 import axios from 'axios';
 const api = axios.create({
@@ -32,43 +32,6 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
-
-const GET_DISCOUNTCODE = gql`
-{
-    priceRules (first:10) {
-      edges {
-        node {
-          id
-          discountCodes(first:10)  {
-            edges {
-              node {
-                code
-                
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
-const GET_METAFIELD = gql`
-query OrdersData($namespace: String!) {
-    shop {
-       metafields(first:10, namespace: $namespace) {
-         edges {
-           node {
-             key
-             value
-             
-           }
-         }
-       }
-     }
-   }
-`;
-
 
 const msgConstants = {
   abandon1: '{{shop_name}}: Hi {{first_name}}, we noticed there were a few items left in your shopping cart 🛒{{cart_items}} If you’re ready to complete your order, your cart awaits you at 👉 {{checkout_url}}',

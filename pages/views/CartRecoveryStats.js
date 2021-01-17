@@ -4,12 +4,12 @@ function CartRecoveryStats(props) {
     return (
         <div >
             <div className="main">
-            { props.stats.map((number) =>
+            {/* { props.stats.map((number) =>
                 <div className="color">
-                    <h2>{number.stat_name} </h2>
-                    <p>{ number.stat_value}</p>
+                    <h2>Hello </h2>
+                    <p> editihappen!</p>
                 </div>
-            )}
+            )} */}
             </div>
         </div>
     );
