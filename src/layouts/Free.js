@@ -90,7 +90,7 @@ export default function Admin({ children, ...rest }) {
       console.log("setting pro");
       //dispatch(setPro);
       //store.dispatch(setPro);
-      pageProps.isPro = true;
+
       router.push("/proplus/dashboard");
       return;
     }

@@ -89,7 +89,7 @@ export default function Admin({ children, ...rest }) {
       console.log("setting pro");
       //dispatch(setPro);
       //store.dispatch(setPro);
-      pageProps.isPro = true;
+
       return;
     }
     console.log("setting free");
