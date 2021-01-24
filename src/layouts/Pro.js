@@ -85,7 +85,7 @@ export default function Admin({ children, ...rest }) {
     console.log(res);
     const subs = res.data.data.data.currentAppInstallation.activeSubscriptions;
     console.log(subs);
-    if (Array.isArray(subs) && subs.length && subs[0].status == "active") {
+    if (Array.isArray(subs) && subs.length && subs[0].status == "ACTIVE") {
       console.log("setting pro");
       //dispatch(setPro);
       //store.dispatch(setPro);
