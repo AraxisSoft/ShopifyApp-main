@@ -2,7 +2,10 @@ import { ApolloProvider } from "@apollo/client";
 import ApolloClient from "apollo-boost";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import store from "app/store";
+import React from "react";
 
+import { useDispatch } from "react-redux";
+import { setPro, setFree } from "features/authSlice";
 import ReactDOM from "react-dom";
 import "assets/css/nextjs-material-dashboard.css?v=1.0.0";
 import "perfect-scrollbar/css/perfect-scrollbar.css";
@@ -32,6 +35,8 @@ const client = new ApolloClient({
 });
 
 function MyApp({ Component, pageProps }) {
+  //const dispatch = useDispatch();
+
   const Layout = Component.layout || (({ children }) => <>{children}</>);
   return (
     <Provider store={store}>

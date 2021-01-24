@@ -2,7 +2,7 @@ import MessageTemplate from "components/MessageTemplate";
 import { useLazyQuery } from "@apollo/client";
 import AbandonCartTable from "components/AbandonCartTable";
 
-import Admin from "layouts/Admin.js";
+import Pro from "layouts/Pro.js";
 import { GET_METAFIELD } from "Gql/GqlConstants";
 
 const AbandonCart = () => {
@@ -35,5 +35,5 @@ const AbandonCart = () => {
     </div>
   );
 };
-AbandonCart.layout = Admin;
+AbandonCart.layout = Pro;
 export default AbandonCart;

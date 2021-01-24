@@ -24,25 +24,19 @@ const dashboardRoutes = [
     path: "/dashboard",
     name: "Dashboard",
     icon: Dashboard,
-    layout: "/free",
+    layout: "/proplus",
   },
   {
     path: "/user-profile",
     name: "User Profile",
     icon: Person,
-    layout: "/free",
+    layout: "/proplus",
   },
   {
     path: "/abandoncart",
     name: "Abandon Cart",
     icon: "content_paste",
-    layout: "/free",
-  },
-  {
-    path: "/upgradetopro",
-    name: "Upgrade To Pro",
-    icon: "content_paste",
-    layout: "/free",
+    layout: "/proplus",
   },
 ];
 

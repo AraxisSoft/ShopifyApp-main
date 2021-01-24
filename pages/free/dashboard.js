@@ -17,7 +17,7 @@ import BugReport from "@material-ui/icons/BugReport";
 import Code from "@material-ui/icons/Code";
 import Cloud from "@material-ui/icons/Cloud";
 // layout for this page
-import Admin from "layouts/Admin.js";
+import Free from "layouts/Free.js";
 // core components
 import GridItem from "components/Grid/GridItem.js";
 import GridContainer from "components/Grid/GridContainer.js";
@@ -266,6 +266,6 @@ function Dashboard() {
   );
 }
 
-Dashboard.layout = Admin;
+Dashboard.layout = Free;
 
 export default Dashboard;

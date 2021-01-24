@@ -2,7 +2,9 @@ import React from "react";
 import { useRouter } from "next/router";
 // creates a beautiful scrollbar
 import PerfectScrollbar from "perfect-scrollbar";
+import { useSelector } from "react-redux";
 
+import { selectIsPro } from "features/authSlice";
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 // core components
@@ -11,6 +13,7 @@ import Footer from "components/Footer/Footer.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
 import FixedPlugin from "components/FixedPlugin/FixedPlugin.js";
 
+import api from "api/api";
 import routes from "routes.js";
 
 import styles from "assets/jss/nextjs-material-dashboard/layouts/adminStyle.js";
@@ -23,6 +26,7 @@ let ps;
 const useStyles = makeStyles(styles);
 
 export default function Admin({ children, ...rest }) {
+  const isPro = useSelector(selectIsPro);
   // used for checking current route
   const router = useRouter();
   // styles
@@ -76,6 +80,28 @@ export default function Admin({ children, ...rest }) {
       window.removeEventListener("resize", resizeFunction);
     };
   }, [mainPanel]);
+  const getSubStatus = async () => {
+    console.log("hello");
+    let res = await api.get("/getsubscription");
+    console.log(res);
+    const subs = res.data.data.data.currentAppInstallation.activeSubscriptions;
+    console.log(subs);
+    if (Array.isArray(subs) && subs.length && subs[0].status == "active") {
+      console.log("setting pro");
+      //dispatch(setPro);
+      //store.dispatch(setPro);
+      pageProps.isPro = true;
+      router.push("/proplus/dashboard");
+      return;
+    }
+    console.log("setting free");
+
+    //dispatch(setFree);
+    //store.dispatch(setFree);
+  };
+  React.useEffect(() => {
+    getSubStatus();
+  }, []);
   return (
     <div className={classes.wrapper}>
       <Sidebar
