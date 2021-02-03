@@ -44,7 +44,7 @@ class MyDocument extends Document {
   }
 }
 
-MyDocument.getStaticProps = async (ctx) => {
+MyDocument.getInitialProps = async (ctx) => {
   // Resolution order
   //
   // On the server:
@@ -76,7 +76,7 @@ MyDocument.getStaticProps = async (ctx) => {
       enhanceApp: (App) => (props) => sheets.collect(<App {...props} />),
     });
 
-  const initialProps = await Document.getStaticProps(ctx);
+  const initialProps = await Document.getInitialProps(ctx);
 
   return {
     ...initialProps,

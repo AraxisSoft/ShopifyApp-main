@@ -12,14 +12,30 @@
 	text-align:center;
 	box-shadow: 2px 2px 3px #999;
 }
+.icon-customshare {
+  vertical-align: middle;
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;}
 .socialButton{
-  	background-image: url(messenger.svg);
+  background-image:url({{ 'whatsapp.svg' | asset_url }});
+  background-color: #FFFFFF;
+  background-size: cover;
 }
 .messengerSocial{
-  	background-image: url(messenger.svg);
+  	background-image:url({{ 'messenger.svg' | asset_url }});
+  background-color: #FFFFFF;
+  background-size: cover;
 }
 .twitter{
-  background-image: url(twitter.svg);
+  background-image:url({{ 'twitter.svg' | asset_url }});
+  background-color: #FFFFFF;
+  background-size: cover;
+}
+.whatsapp{
+  background-image:url({{ 'whatsapp.svg' | asset_url }});
+  background-color: #FFFFFF;
+  background-size: cover;
 }
 .my-float{
 	margin-top:22px;
@@ -33,13 +49,17 @@
 }
 
 .ulli{
-	list-style:none;
+	border-radius:50px;
+	text-align:center;
+	box-shadow: 2px 2px 3px #999;
+	width:60px;
+	height:60px;
+	display:block;
 	margin-bottom:10px;
 }
 
 .ulli a{
-	background-color:#F33;
-	color:#FFF;
+	
 	border-radius:50px;
 	text-align:center;
 	box-shadow: 2px 2px 3px #999;
@@ -95,7 +115,3 @@ a#menu-share:hover > i{
     from {transform: rotate(360deg);}
     to {transform: rotate(0deg);}
 }
-
-
-
-

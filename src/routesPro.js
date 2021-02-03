@@ -18,7 +18,7 @@
 // @material-ui/icons
 import Dashboard from "@material-ui/icons/Dashboard";
 import Person from "@material-ui/icons/Person";
-
+import SettingsIcon from "@material-ui/icons/Settings";
 const dashboardRoutes = [
   {
     path: "/dashboard",
@@ -30,6 +30,12 @@ const dashboardRoutes = [
     path: "/user-profile",
     name: "User Profile",
     icon: Person,
+    layout: "/proplus",
+  },
+  {
+    path: "/settings",
+    name: "Settings",
+    icon: SettingsIcon,
     layout: "/proplus",
   },
   {

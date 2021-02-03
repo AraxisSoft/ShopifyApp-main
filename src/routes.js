@@ -18,7 +18,7 @@
 // @material-ui/icons
 import Dashboard from "@material-ui/icons/Dashboard";
 import Person from "@material-ui/icons/Person";
-
+import SettingsIcon from "@material-ui/icons/Settings";
 const dashboardRoutes = [
   {
     path: "/dashboard",
@@ -36,6 +36,12 @@ const dashboardRoutes = [
     path: "/abandoncart",
     name: "Abandon Cart",
     icon: "content_paste",
+    layout: "/free",
+  },
+  {
+    path: "/settings",
+    name: "Settings",
+    icon: SettingsIcon,
     layout: "/free",
   },
   {

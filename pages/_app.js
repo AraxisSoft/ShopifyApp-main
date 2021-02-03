@@ -53,9 +53,9 @@ MyApp.getStaticProps = async ({ Component, router, ctx }) => {
   console.log("Hi its me");
   let pageProps = {};
   console.log("called");
-  if (Component.getStaticProps) {
+  if (Component.getInitialProps) {
     console.log("called too");
-    pageProps = await Component.getStaticProps(ctx);
+    pageProps = await Component.getInitialProps(ctx);
   }
 
   return { pageProps };
