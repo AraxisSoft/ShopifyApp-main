@@ -109,19 +109,38 @@ function Settings() {
                       }
                     }, 600);
                   }),
+                onRowDelete: (oldData) =>
+                  new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                      const dataDelete = [...tableData];
+                      const index = oldData.tableData.id;
+                      dataDelete.splice(index, 1);
+                      setTableData([...dataDelete]);
+
+                      resolve();
+                    }, 1000);
+                  }),
+                onRowAdd: (newData) =>
+                  new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                      setTableData([...tableData, newData]);
+
+                      resolve();
+                    }, 1000);
+                  }),
               }}
-              actions={[
-                (rowData) => ({
-                  icon: "delete",
-                  tooltip: "Delete Button",
-                  onClick: (event, rowData) => {
-                    if (window.confirm("You want to delete " + rowData.name)) {
-                      console.log("here");
-                      //dispatch(deleteSale(rowData.id));
-                    }
-                  },
-                }),
-              ]}
+              //   actions={[
+              //     (rowData) => ({
+              //       icon: "delete",
+              //       tooltip: "Delete Button",
+              //       onClick: (event, rowData) => {
+              //         if (window.confirm("You want to delete " + rowData.name)) {
+              //           console.log("here");
+              //           //dispatch(deleteSale(rowData.id));
+              //         }
+              //       },
+              //     }),
+              //   ]}
             />
           </CardBody>
         </Card>
