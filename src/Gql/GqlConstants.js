@@ -41,3 +41,26 @@ export const GET_METAFIELD_WITH_KEY = gql`
     }
   }
 `;
+export const SET_METAFIELD_WITH_KEY = gql`
+  mutation addmetafield(
+    $namespace: String!
+    $key: String!
+    $value: String!
+    $value_type: String!
+  ) {
+    shop {
+      metafield(
+        namespace: $namespace
+        key: $key
+        value: $value
+        value_type: $value_type
+      ) {
+        value
+      }
+      userErrors {
+        field
+        message
+      }
+    }
+  }
+`;

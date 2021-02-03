@@ -13,8 +13,11 @@ import Table from "components/Table/Table.js";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
-import { GET_METAFIELD_WITH_KEY, GET_METAFIELD } from "Gql/GqlConstants";
-import { useQuery } from "@apollo/client";
+import {
+  GET_METAFIELD_WITH_KEY,
+  SET_METAFIELD_WITH_KEY,
+} from "Gql/GqlConstants";
+import { useQuery, useMutation } from "@apollo/client";
 import { get } from "js-cookie";
 const styles = {
   cardCategoryWhite: {
@@ -49,7 +52,35 @@ const styles = {
 const useStyles = makeStyles(styles);
 
 function Settings() {
+  const [shopOrigin, setshopOrigin] = useState("");
+  const [updateMetafield] = useMutation(SET_METAFIELD_WITH_KEY);
   const [tableData, setTableData] = useState([]);
+  const setConfig = async (data) => {
+    // updateMetafield({
+    //   variables: {
+    //     namespace: "floatButton",
+    //     key: "config",
+    //     value: JSON.stringify(data),
+    //     value_type: "json_string",
+    //   },
+    // });
+    data.map((x) =>
+      x.logo == "messenger"
+        ? (x.link = `apps/floatbutton/api/redirect/${shopOrigin}/${x.name}/https://www.facebook.com`)
+        : (x.link = `apps/floatbutton/api/redirect/${shopOrigin}/${x.name}/https://web.whatsapp.com`)
+    );
+    console.log(data);
+    const obj = {
+      metafield: {
+        namespace: "floatButton",
+        key: "config",
+        value: JSON.stringify(data),
+        value_type: "json_string",
+      },
+    };
+    const res = await api.post("/metafields", obj);
+    console.log(res.data);
+  };
   useQuery(GET_METAFIELD_WITH_KEY, {
     variables: { namespace: "floatButton", key: "config" },
     onCompleted: (returnedData) => {
@@ -65,9 +96,12 @@ function Settings() {
       console.log("onError " + err);
     },
   });
-  const getData = async () => {};
+  const getShopOrigin = async () => {
+    let shopOrigin = await api.get("/shoporigin");
+    setshopOrigin(shopOrigin.data.data);
+  };
   useEffect(() => {
-    //getData();
+    getShopOrigin();
   }, []);
   const classes = useStyles();
   return (
@@ -90,6 +124,7 @@ function Settings() {
                 {
                   title: "Social Button",
                   field: "logo",
+                  lookup: { whatsapp: "Whatsapp", messenger: "Messenger" },
                 },
                 { title: "Link/Number", field: "inputLink" },
               ]}
@@ -106,6 +141,7 @@ function Settings() {
                         dataUpdate[index] = newData;
                         dataUpdate[index].changed = true;
                         setTableData([...dataUpdate]);
+                        setConfig(dataUpdate);
                       }
                     }, 600);
                   }),
@@ -116,7 +152,7 @@ function Settings() {
                       const index = oldData.tableData.id;
                       dataDelete.splice(index, 1);
                       setTableData([...dataDelete]);
-
+                      setConfig(dataDelete);
                       resolve();
                     }, 1000);
                   }),
@@ -124,7 +160,7 @@ function Settings() {
                   new Promise((resolve, reject) => {
                     setTimeout(() => {
                       setTableData([...tableData, newData]);
-
+                      setConfig([...tableData, newData]);
                       resolve();
                     }, 1000);
                   }),
